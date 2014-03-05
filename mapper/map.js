@@ -53,6 +53,7 @@ var drawMap = function(heatSpots) {
 
   // Draw the map.
   var map = new google.maps.Map(container, mapOptions);
+  console.log(heatSpots);
 
   // Convert heat list to google maps array.
   var pointArray = new google.maps.MVCArray(heatSpots);
@@ -110,4 +111,4 @@ var initialize = function() {
 }
 
 // Create a listener for when the DOM has loaded.
-google.maps.event.addDomListener(window, 'load', initialize);
+$(document).ready(initialize);
