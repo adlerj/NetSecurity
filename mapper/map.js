@@ -83,7 +83,7 @@ var drawMap = function(heatSpots) {
 var initialize = function() {
 
   // The site we use to get information about IP addresses.
-  var geoURL = 'http://freegeoip.net/json/';
+  var geoURL = 'http://162.248.161.124:8080/json/';
 
   // An array we will keep the locations we wish to highlight
   // in the form of google LatLng objects.
