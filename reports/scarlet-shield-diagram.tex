@@ -1,0 +1,64 @@
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+
+% Defines a `datastore' shape for use in DFDs.  This inherits from a
+% rectangle and only draws two horizontal lines.
+\makeatletter
+\pgfdeclareshape{datastore}{
+  \inheritsavedanchors[from=rectangle]
+  \inheritanchorborder[from=rectangle]
+  \inheritanchor[from=rectangle]{center}
+  \inheritanchor[from=rectangle]{base}
+  \inheritanchor[from=rectangle]{north}
+  \inheritanchor[from=rectangle]{north east}
+  \inheritanchor[from=rectangle]{east}
+  \inheritanchor[from=rectangle]{south east}
+  \inheritanchor[from=rectangle]{south}
+  \inheritanchor[from=rectangle]{south west}
+  \inheritanchor[from=rectangle]{west}
+  \inheritanchor[from=rectangle]{north west}
+  \backgroundpath{
+    %  store lower right in xa/ya and upper right in xb/yb
+    \southwest \pgf@xa=\pgf@x \pgf@ya=\pgf@y
+    \northeast \pgf@xb=\pgf@x \pgf@yb=\pgf@y
+    \pgfpathmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+    \pgfpathmoveto{\pgfpoint{\pgf@xa}{\pgf@yb}}
+    \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yb}}
+ }
+}
+\makeatother
+
+\begin{document}
+\begin{center}
+
+\begin{tikzpicture}[
+  font=\sffamily,
+  every matrix/.style={ampersand replacement=\&,column sep=2cm,row sep=2cm},
+  source/.style={draw,thick,rounded corners,fill=yellow!20,inner sep=.3cm},
+  process/.style={draw,thick,circle,fill=blue!20},
+  sink/.style={source,fill=green!20},
+  datastore/.style={draw,very thick,shape=datastore,inner sep=.3cm},
+  dots/.style={gray,scale=2},
+  to/.style={->,>=stealth',shorten >=1pt,semithick,font=\sffamily\footnotesize},
+  every node/.style={align=center}]
+
+	\matrix{
+		\node[source] (extclient) {external client};
+			\&  \node[sink] (admin) {admin client}; \& \\
+
+		\node[process] (snort) {Snort};
+			\& \node[datastore] (mysql) {MySQL}; \& 
+			\node[process] (scarletshield) {Analyzer}; \\
+	};
+
+	\draw[to] (extclient) -- node[midway,left]{web traffic} (snort);
+	\draw[to] (snort) -- node[midway,below]{logs traffic} (mysql);
+	\draw[to] (mysql) to[bend right=50] node[midway,below]{analyzes data} (scarletshield);
+	\draw[to] (scarletshield) to[bend right=50] node[midway,above] {updates rules} (mysql);
+	\draw[to] (mysql) -- node[midway,left] {requests logs} (admin);
+
+\end{tikzpicture}
+\end{center}
+\end{document}
