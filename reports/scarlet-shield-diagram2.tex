@@ -1,0 +1,101 @@
+\documentclass{article}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+\usepackage{amsmath,bm,times}
+\newcommand{\mx}[1]{\mathbf{\bm{#1}}} % Matrix command
+\newcommand{\vc}[1]{\mathbf{\bm{#1}}} % Vector command
+
+\begin{document}
+\pagestyle{empty}
+
+% We need layers to draw the block diagram
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+
+% Define a few styles and constants
+\tikzstyle{component}=[draw, fill=blue!20, text width=5em, 
+    text centered, minimum height=2.5em]
+\tikzstyle{sensor}=[draw, fill=blue!20, text width=5em, 
+    text centered, minimum height=2.5em]
+\tikzstyle{ann} = [above, text width=5em]
+\tikzstyle{naveqs} = [sensor, text width=6em, fill=red!20, 
+    minimum height=12em, rounded corners]
+\def\blockdist{2.3}
+\def\edgedist{2.5}
+
+
+\begin{tikzpicture}
+
+    \node (mysql) [component] {MySQL};
+    % going left
+    \path (mysql.west)+(-\blockdist,0) node (snort) [component] {Snort};
+    \path (snort.west)+(-\blockdist,0) node (iptables) [component] {iptables};
+    % going right
+    \path (mysql.east)+(\blockdist,0) node (drupal) [component] {Drupal};
+
+    %going down
+    \path (snort.south)+(0,-1.3) node (pulledpork) [component] {Pulled Pork};
+
+    % ($ (A) !.5! (B) $)
+    %\path ($ (iptables) !.5! (drupal) $)+(0,\blockdist) node (shield) {Scarlet Shield};
+    \path (mysql.north west)+(0,\blockdist) node (shield) {Scarlet Shield};
+
+    \path [draw, ->] (iptables) -- (snort);
+    \path [draw, ->] (snort) -- (mysql);
+    \path [draw, ->] (mysql) -- (drupal);
+    \path [draw, ->] (pulledpork) -- (snort);
+
+    \path [draw, ->] (drupal.north) -- ++ (0,0.5) -| (iptables);
+
+    % \draw [->] (drupal.east) -- node [ann] {Admin Dashboard} + (\edgedist,0)
+    % 	node[right] {Admin Client};
+
+
+    %     \path [draw, ->] (gyros) -- node [above] {$\vc{\omega}_{ib}^b$} 
+    %     (naveq.west |- gyros) ;
+    % % We could simply have written (gyros) .. (naveq.140). However, it's
+    % % best to avoid hard coding coordinates
+    % \path [draw, ->] (accel) -- node [above] {$\vc{f}^b$} 
+    %     (naveq.west |- accel);
+    % \node (IMU) [below of=accel] {IMU};
+    % \path (naveq.south west)+(-0.6,-0.4) node (INS) {INS};
+    % \draw [->] (naveq.50) -- node [ann] {Velocity } + (\edgedist,0) 
+    %     node[right] {$\vc{v}^l$};
+    % \draw [->] (naveq.20) -- node [ann] {Attitude} + (\edgedist,0) 
+    %     node[right] { $\mx{R}_l^b$};
+    % \draw [->] (naveq.-25) -- node [ann] {Horisontal position} + (\edgedist,0)
+    %     node [right] {$\mx{R}_e^l$};
+    % \draw [->] (naveq.-50) -- node [ann] {Depth} + (\edgedist,0) 
+    %     node[right] {$z$};
+
+    % Now it's time to draw the colored IMU and INS rectangles.
+    % To draw them behind the blocks we use pgf layers. This way we  
+    % can use the above block coordinates to place the backgrounds   
+    \begin{pgfonlayer}{background}
+        % Compute a few helper coordinates
+        \path (iptables.west |- shield.north)+(-0.5,0.3) node (a) {};
+        \path (pulledpork.south -| drupal.east)+(+0.3,-0.3) node (b) {};
+        \path[fill=yellow!20,rounded corners, draw=black!50, dashed]
+            (a) rectangle (b);
+        % \path (gyros.north west)+(-0.2,0.2) node (a) {};
+        % \path (IMU.south -| gyros.east)+(+0.2,-0.2) node (b) {};
+        % \path[fill=blue!10,rounded corners, draw=black!50, dashed]
+        %     (a) rectangle (b);
+        \path (mysql.north west)+(-0.2,0.2) node (a) {};
+        \path (drupal.south east)+(+0.2,-0.2) node (b) {};
+        \path[fill=red!20,rounded corners, draw=black!50, dashed]
+        	(a) rectangle (b);
+
+		\path (iptables.north west)+(-0.2,0.2) node (a) {};
+		\path (pulledpork.south east)+(+0.2,-0.2) node (b) {};
+		\path[fill=red!20,rounded corners, draw=black!50, dashed]
+			(a) rectangle (b);
+
+
+    \end{pgfonlayer}
+\end{tikzpicture}
+
+
+\end{document}
