@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass{standalone}
 \usepackage{tikz}
 \usetikzlibrary{arrows}
 
@@ -31,7 +31,6 @@
 \makeatother
 
 \begin{document}
-\begin{center}
 
 \begin{tikzpicture}[
   font=\sffamily,
@@ -60,5 +59,4 @@
 	\draw[to] (mysql) -- node[midway,left] {requests logs} (admin);
 
 \end{tikzpicture}
-\end{center}
 \end{document}

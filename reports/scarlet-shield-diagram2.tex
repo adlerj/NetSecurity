@@ -1,7 +1,8 @@
-\documentclass{article}
+\documentclass{standalone}
 
 \usepackage{tikz}
-\usetikzlibrary{shapes,arrows}
+\usepackage{comment}
+\usetikzlibrary{shapes,arrows,calc}
 \usepackage{amsmath,bm,times}
 \newcommand{\mx}[1]{\mathbf{\bm{#1}}} % Matrix command
 \newcommand{\vc}[1]{\mathbf{\bm{#1}}} % Vector command
@@ -22,35 +23,105 @@
 \tikzstyle{ann} = [above, text width=5em]
 \tikzstyle{naveqs} = [sensor, text width=6em, fill=red!20, 
     minimum height=12em, rounded corners]
+\def\titledist{0.8}
+\def\vblockd{1.2}
+\def\hblockd{2.3}
 \def\blockdist{2.3}
 \def\edgedist{2.5}
 
 
-\begin{tikzpicture}
+\begin{tikzpicture}[to/.style={->,>=stealth',shorten >=1pt,semithick,font=\sffamily\footnotesize}]
 
+
+	% use as the center piece
     \node (mysql) [component] {MySQL};
-    % going left
-    \path (mysql.west)+(-\blockdist,0) node (snort) [component] {Snort};
-    \path (snort.west)+(-\blockdist,0) node (iptables) [component] {iptables};
-    % going right
-    \path (mysql.east)+(\blockdist,0) node (drupal) [component] {Drupal};
+    
+    % the firewall component
+    \path (mysql.south)+(0,-\vblockd) node (pork) [component] {Pulled Pork};
+    \path (pork.west)+(-\hblockd,0) node (snort) [component] {Snort};
+    \path (snort.north)+(0,\vblockd) node (barnyard) [component] {Barnyard2};
+    \path (snort.west)+(-\hblockd,0) node (iptables) [component] {iptables};
+    
+    % use with mysql as the admin suite
+    \path (mysql.north)+(0,\vblockd) node (drupal) [component] {Drupal};
+    %
+    \path (iptables.north)+(0,\vblockd) node (fail2ban) [component] {fail2ban};
+    
+    % module titles
+    \path ($ (fail2ban.north) !.5! (barnyard.north) $)+(0,\titledist) node (firewall) {Firewall};
+    \path  (drupal.north)+(0,\titledist) node (admin) {Admin Suite};
+    \path ($ (fail2ban.west) !.5! (mysql.east) $)+(0,3.7) node (shield) {Scarlet Shield};
+    
+    % draw arrows
+    \draw[to] (iptables) -- (snort);
+    \draw[to] (pork) --  (snort);
+    \draw[to] (snort) -- (barnyard);
+    \draw[to] (barnyard) -- (mysql);
+    \draw[to] (fail2ban) -- (iptables);
+    \draw[to] (mysql) -- (drupal);
+    
+    \draw[to] (drupal.165) -| (fail2ban);
+    
+    % external actors
+    \path (iptables.west)+(-2.4,0) node (req) {};
+    \draw[to] (req) -- node[above] {requests} (iptables);
+    
+    \path (drupal.east)+(2.4,0) node (user) {};
+    \draw[to] (user) -- node[above] {admin} (drupal);
+    
+    \path (pork.east)+(2.4,0) node (update) {};
+    \draw[to] (update) -- node[above] {update} (pork);
+    
+    \begin{pgfonlayer}{background}
+        % Compute a few helper coordinates
+        \path (fail2ban.west |- shield.north)+(-0.5,0.3) node (a) {};
+        \path (pork.south east)+(+0.5,-0.4) node (b) {};
+        \path[fill=yellow!20,rounded corners, draw=black!50, dashed]
+            (a) rectangle (b);
+        % \path (gyros.north west)+(-0.2,0.2) node (a) {};
+        % \path (IMU.south -| gyros.east)+(+0.2,-0.2) node (b) {};
+        % \path[fill=blue!10,rounded corners, draw=black!50, dashed]
+        %     (a) rectangle (b);
+        \path (mysql.west |- admin.north)+(-0.2,0.2) node (a) {};
+        \path (mysql.south east)+(+0.2,-0.2) node (b) {};
+        \path[fill=red!22,rounded corners, draw=black!50, dashed]
+           	(a) rectangle (b);
 
-    %going down
-    \path (snort.south)+(0,-1.3) node (pulledpork) [component] {Pulled Pork};
+   		\path (fail2ban.west |- firewall.north)+(-0.2,0.2) node (a) {};
+   		\path (snort.south east)+(+0.2,-0.2) node (b) {};
+   		\path[fill=red!22,rounded corners, draw=black!50, dashed]
+   			(a) rectangle (b);
 
-    % ($ (A) !.5! (B) $)
-    %\path ($ (iptables) !.5! (drupal) $)+(0,\blockdist) node (shield) {Scarlet Shield};
-    \path (mysql.north west)+(0,\blockdist) node (shield) {Scarlet Shield};
 
-    \path [draw, ->] (iptables) -- (snort);
-    \path [draw, ->] (snort) -- (mysql);
-    \path [draw, ->] (mysql) -- (drupal);
-    \path [draw, ->] (pulledpork) -- (snort);
+    \end{pgfonlayer}
 
-    \path [draw, ->] (drupal.north) -- ++ (0,0.5) -| (iptables);
+%    % going left
+%    \path (mysql.west)+(-\blockdist,0) node (barnyard) [component] {Barnyard2};
+%    \path (barnyard.west)+(-\blockdist,0) node (snort) [component] {Snort};
+%    % going right
+%    \path (mysql.east)+(\blockdist,0) node (drupal) [component] {Drupal};
+%
+%    %going down
+%    \path (snort.south)+(0,-1.3) node (pulledpork) [component] {Pulled Pork};
+%    
+%    % going up
+%    \path (snort.north)+(0,1.3) node (iptables) [component] {iptables};
+%
+%    % Place title between the two endpoints
+%    \path ($ (snort) !.5! (drupal) $)+(0,\blockdist) node (shield) {Scarlet Shield};
+%%    \path (mysql.north west)+(0,\blockdist) node (shield) {Scarlet Shield};
+%	\path ($ (mysql) !.5! (drupal) $)+(0,\titledist) node (admin) {Admin Site};
+%
+%    \path [draw, ->] (iptables) -- (snort);
+%    \path [draw, ->] (snort) -- (barnyard);
+%    \path [draw, ->] (barnyard) -- (mysql);
+%    \path [draw, ->] (mysql) -- (drupal);
+%    \path [draw, ->] (pulledpork) -- (snort);
 
-    % \draw [->] (drupal.east) -- node [ann] {Admin Dashboard} + (\edgedist,0)
-    % 	node[right] {Admin Client};
+%    \path [draw, ->] (drupal.north) -- ++ (0,0.5) -| (iptables);
+
+%     \draw [->] (drupal.east) -- node [ann] {Admin Dashboard} + (\edgedist,0)
+%     	node[right] {Admin Client};
 
 
     %     \path [draw, ->] (gyros) -- node [above] {$\vc{\omega}_{ib}^b$} 
@@ -73,28 +144,30 @@
     % Now it's time to draw the colored IMU and INS rectangles.
     % To draw them behind the blocks we use pgf layers. This way we  
     % can use the above block coordinates to place the backgrounds   
-    \begin{pgfonlayer}{background}
-        % Compute a few helper coordinates
-        \path (iptables.west |- shield.north)+(-0.5,0.3) node (a) {};
-        \path (pulledpork.south -| drupal.east)+(+0.3,-0.3) node (b) {};
-        \path[fill=yellow!20,rounded corners, draw=black!50, dashed]
-            (a) rectangle (b);
-        % \path (gyros.north west)+(-0.2,0.2) node (a) {};
-        % \path (IMU.south -| gyros.east)+(+0.2,-0.2) node (b) {};
-        % \path[fill=blue!10,rounded corners, draw=black!50, dashed]
-        %     (a) rectangle (b);
-        \path (mysql.north west)+(-0.2,0.2) node (a) {};
-        \path (drupal.south east)+(+0.2,-0.2) node (b) {};
-        \path[fill=red!20,rounded corners, draw=black!50, dashed]
-        	(a) rectangle (b);
+%    \begin{pgfonlayer}{background}
+%        % Compute a few helper coordinates
+%        \path (iptables.west |- shield.north)+(-0.5,0.3) node (a) {};
+%        \path (pulledpork.south -| drupal.east)+(+0.3,-0.3) node (b) {};
+%        \path[fill=yellow!20,rounded corners, draw=black!50, dashed]
+%            (a) rectangle (b);
+%        % \path (gyros.north west)+(-0.2,0.2) node (a) {};
+%        % \path (IMU.south -| gyros.east)+(+0.2,-0.2) node (b) {};
+%        % \path[fill=blue!10,rounded corners, draw=black!50, dashed]
+%        %     (a) rectangle (b);
+%        \path (mysql.west |- admin.north)+(-0.2,0.2) node (a) {};
+%        \path (drupal.south east)+(+0.2,-0.2) node (b) {};
+%        \path[fill=red!22,rounded corners, draw=black!50, dashed]
+%        	(a) rectangle (b);
+%
+%		\path (iptables.north west)+(-0.2,0.2) node (a) {};
+%		\path (pulledpork.south east)+(+0.2,-0.2) node (b) {};
+%		\path[fill=red!22,rounded corners, draw=black!50, dashed]
+%			(a) rectangle (b);
+%
+%
+%    \end{pgfonlayer}
+    
 
-		\path (iptables.north west)+(-0.2,0.2) node (a) {};
-		\path (pulledpork.south east)+(+0.2,-0.2) node (b) {};
-		\path[fill=red!20,rounded corners, draw=black!50, dashed]
-			(a) rectangle (b);
-
-
-    \end{pgfonlayer}
 \end{tikzpicture}
 
 
