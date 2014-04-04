@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name='viewport' content='initial-scale=1.0, user-scalable=no'/>
+    
+    <!-- Some styling to make this completely full-screen -->
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }  
+
+      #overlay {
+        position: absolute;
+        z-index: 100;
+        height: 100%;
+        line-height: 100%;
+        width: 100%;
+        text-align: center;
+        padding-top:50%;
+        padding-left:50%;
+      }
+
+      #loader {
+        margin-top: -20px;
+        margin-left: -100px;
+        width: 200px;
+        height: 40px;
+        background-color: white;
+      }
+
+      #progress {
+        width: 0px;
+        height: 40px;
+        background-color: red;
+      }
+
+      .text-option {
+        font-size: large;
+        font-weight: bold;
+        color: #333333;
+        padding: 5px;
+        text-align: center;
+        cursor: pointer;
+      }
+
+      .button {
+        background-color: white;
+        height: 40px;
+        width: 40px;
+        background-image: url("gear.png");
+        float: right;
+        box-shadow: 1px 2px 2px grey;
+        cursor: pointer;
+        overflow: hidden;
+      }
+
+      .options {
+        background-color: white;
+        box-shadow: 1px 2px 2px grey;
+        overflow: hidden;
+      }
+      
+    </style>
+
+    <!-- JQuery lib -->
+    <script src='http://code.jquery.com/jquery-latest.min.js'></script>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script
+      src='https://maps.googleapis.com/maps/api/js?key=AIzaSyCpg0PUjB00YEnDcEg2WKT0J8vcLPIldrM&sensor=false&libraries=visualization'>
+    </script>
+
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <!-- Our JS functions -->
+    <script src='map.min.js'></script>
+  </head>
+
+  <body>
+    <div id='overlay'>
+      <div id='loader'>
+        <div id='progress'></div>
+      </div>
+    </div>
+    <div id='map-canvas'></div>
+  </body>
+</html>

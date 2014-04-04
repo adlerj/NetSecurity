@@ -1,0 +1,3 @@
+#!/bin/bash
+
+sudo cat scripts/* | sudo uglifyjs -nc -o map.min.js
