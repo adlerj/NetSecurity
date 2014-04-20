@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ScarletShield Suite</title>
+		<link rel='stylesheet' type='text/css' href='main.css'>
+		<script type='text/javascript' src='main.js'></script>
+	</head>
+	<body>
+		<div id='header'>
+			<img id='logo' src='logo.png' alt='ScarletShield Logo'/>
+			<div id='headLeftover'>
+				<div id='search'>
+					<input type='text' id='searchbox' name='searchbox'
+						placeholder='Search an IP or Attack'><!--
+					--><input type='submit' id='searchsubmit' value=' '/>
+				</div>
+				<ul id='topul'>
+					<li id='selected'>HOME</li>
+					<li>ANALYZE</li>
+					<li>MAP</li>
+				</ul>
+			</div>
+		</div>
+		<div id='main'>
+			<div id='sidespace'>
+				<div id='sidebar' class='shadow'>
+					<div class='indent'>
+						<h2 class='sideh2'>Sort By:</h2>
+						<select>
+							<option value='recent'>Most Recent</option>
+							<option value='oldest'>Oldest First</option>
+							<option value='pdec'>Priority Decreasing</option>
+							<option value='pinc'>Priority Increasing</option>
+						</select>
+					</div>
+					<div class='onepixline'></div>
+					<div class='indent'>
+						<h2 class='sideh2'>Filter By:</h2>
+						<h3>Priority</h3>
+						<div class='slider'></div>
+						<h3>Begin Date</h3>
+						<input type='date'>
+						<h3>End Date</h3>
+						<input type='date'>
+					</div>
+				</div>
+			</div>
+			<div id='content'>
+			
+				<div class='top-card'>
+					<center><img class='imgfix' src='warning.png'/></center>
+					<div class='inner-top-card shadow'>
+						<div class='boldred'></div>
+						<h1 class='cardtitle'>Attack History</h1>
+					</div>
+				</div>
+				
+				<div class='card shadow'>
+					<div class='redline'></div>
+					<div class='inner-card'>
+						<div class='iconandtext'>
+							<img class='iticon' src='cal.png' alt='Calendar'/>
+							<h1 class='ittext'>3/31/2014</h1>
+						</div>
+						
+						<div class='onepixline clear'></div>
+						<div class='entry'>
+							<div class='detButton'>Details</div>
+							<h2 class='entryTitle'>ssh: Protocol mismatch</h2>
+							<p class='entryDes'><span>From</span> 125.253.112.71 <span>at</span> 7:31PM</p>
+						</div>
+						
+						<!-- >Extra just for show</!-->
+						<div class='onepixline clear'></div>
+						<div class='entry'>
+							<div class='detButton'>Details</div>
+							<h2 class='entryTitle'>smtp: Attempted command buffer overflow</h2>
+							<p class='entryDes'><span>From</span> 162.248.160.26 <span>at</span> 3:25PM</p>
+						</div>
+						
+					</div>
+				</div>
+				
+				<!-- DON"T NEED THIS AT ALL -->
+				<div class='card shadow'>
+					<div class='redline'></div>
+					<div class='inner-card'>
+						<div class='iconandtext'>
+							<img class='iticon' src='cal.png' alt='Calendar'/>
+							<h1 class='ittext'>3/30/2014</h1>
+						</div>
+						
+						<div class='onepixline clear'></div>
+						<div class='entry'>
+							<div class='detButton'>Details</div>
+							<h2 class='entryTitle'>ssh: Protocol mismatch</h2>
+							<p class='entryDes'><span>From</span> 125.253.112.71 <span>at</span> 7:31PM</p>
+						</div>
+						
+						<div class='onepixline clear'></div>
+						<div class='entry'>
+							<div class='detButton'>Details</div>
+							<h2 class='entryTitle'>smtp: Attempted command buffer overflow</h2>
+							<p class='entryDes'><span>From</span> 162.248.160.26 <span>at</span> 3:25PM</p>
+						</div>
+						
+					</div>
+				</div>
+
+        <div class='bottom-space'></div>
+				
+				
+			</div>
+		</div>
+    </body>
+    </html>

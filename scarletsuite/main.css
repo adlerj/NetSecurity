@@ -1,0 +1,261 @@
+@font-face {
+  font-family: "cambria";
+  src: url('cambria.TTC');
+}
+
+* {
+	padding: 0px;
+	margin: 0px;
+}
+
+html, body {
+	width: 100%;
+	height: 100%;
+	background-color: #f0f0f0;
+}
+
+header, section, footer, aside, nav, main, article, figure { 
+	display: block; 
+}
+
+#logo {
+	float: left;
+	height: 100px;
+}
+
+#headLeftover {
+	padding-top: 10px;
+	padding-right: 10px;
+	height: 90px;
+	float: right;
+}
+
+#search {
+	float: right;
+}
+
+#searchbox:focus {
+  outline-width: 0;
+}
+
+#searchbox {
+	width:300px;
+	height: 30px;
+	border: none;
+	padding-left: 5px;
+}
+
+#searchsubmit:focus {
+  outline-width: 0;
+}
+
+#searchsubmit {
+	background-image: url('mag.png');
+	background-color: white;
+	background-repeat: no-repeat;
+	height: 30px;
+	width: 30px;
+	border: none;
+	cursor: pointer;
+	background-size: 30px;
+}
+
+#header {
+	height: 100px;
+	width: 100%;	
+	background-color: #b22324;
+}
+
+#topul {
+	margin-top: 50px;
+	height: 40px;
+	list-style-type: none;
+}
+
+#selected {
+	background-color: #f0f0f0;
+	color: black;
+}
+
+#topul :not(#selected) {
+	cursor: pointer;
+	color: grey;
+	background-color: #cccccc;
+}
+
+#topul li {
+	font-family: cambria;
+	font-size: large;
+	height: 40px;
+	display: inline-block;
+	line-height: 40px;
+	text-align: center;
+	width: 200px;
+}
+
+#sidespace {
+	width: 300px;
+	float: left;
+}
+
+#content {
+	width: 700px;
+	float: right;
+}
+
+#main {
+	margin: 20px auto;
+	width: 1000px;
+}
+
+#sidebar {
+	background-color: white;
+	width: 230px;
+	padding: 10px;
+}
+
+.top-card {
+	
+}
+
+.onepixline {
+	height: 1px;
+	width: 100%;
+	background-color: lightgrey;
+}
+.indent {
+	margin:15px 5px;
+}
+
+.boldred {
+	background-color: #b22324;
+	height: 8px;
+	width: 100%;
+}
+
+.cardtitle {
+	padding: 50px 0px 20px 0px;
+	text-align: center;
+	color: #b22324;
+} 
+
+.inner-top-card {
+ margin-top: -54px;
+ background-color:white;
+}
+
+.imgfix {
+	display: block;
+}
+
+.card {
+	margin-top: 20px;
+	width: 100%;
+	background-color: white;
+}
+
+.iconandtext {
+	width: 40%;
+	margin: 20px auto;
+	height: 89px;
+}
+
+.iticon {
+	float: left;
+}
+
+.ittext {
+	float: right;
+	height: 89px;
+	line-height: 89px;
+	color: #b22324;
+}
+
+.clear {
+	clear: both;
+}
+
+.redline {
+	width: 100%;
+	height: 5px;
+	background-color: #b22324;
+}
+
+.detButton {
+	background-color: #b22324;
+	float: right;
+	height: 50px;
+	line-height: 50px;
+	width: 100px;
+	text-align: center;
+	color: white;
+	cursor: pointer;
+}
+
+.entry {
+	padding: 20px;
+}
+
+.inner-card {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.entryDes {
+	font-size: large;
+}
+
+.entryDes span {
+	color: grey;
+}
+
+.bottom-space {
+  height: 20px;
+}
+
+.shadow {
+	box-shadow: 3px 3px 10px grey;
+}
+
+.slider {
+	width: 90%;
+	margin: 15px 5% 15px 5%;	
+}
+
+.slidebar {
+	width: 100%;
+	height: 2px;
+	background-color: #b22324;
+}
+
+[class^='handle'] {
+	height: 14px;
+	width: 14px;
+	border-radius: 5px;
+	background-color: lightgrey;
+}
+
+.handle-left {
+	margin-top: -7px;
+}
+
+.handle-right{
+	margin-top: -14px;
+}
+
+h3 {
+	font-family: cambria;
+	font-weight: normal;
+	font-size: large;
+	margin: 5px auto 5px auto;
+}
+
+.sideh2 {
+	margin: 5px auto 5px auto;
+}
+
+h2 {
+	font-family: cambria;
+	font-weight: normal;
+	font-size: x-large;
+}
