@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ScarletShield Suite</title>
+		<link rel='stylesheet' type='text/css' href='main.css'>
+    <script type="text/javascript" src="//www.google.com/jsapi"></script>
+		<script type='text/javascript' src='analytics.min.js'></script>
+	</head>
+	<body>
+<script>
+     var cook = getCookie("accesskey");
+     if(cook == ""){
+       window.location = "index.html";   
+     }
+ 
+     function getCookie(cname)
+     {
+       var name = cname + "=";
+       var ca = document.cookie.split(';');
+       for(var i=0; i<ca.length; i++) 
+         {
+           var c = ca[i].trim();
+           if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+         }
+       return "";
+     }
+ 
+     function logOut()
+     {
+       document.cookie = "accesskey=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+       window.location = "index.html";   
+       return;
+     }
+ 
+   </script>
+
+        <div id='pageup' style='position:fixed; cursor:pointer;'>
+          <img src='images/arrow.png'/>
+        </div>
+		<div id='header'>
+      <div id='inner-header'>
+			<img id='logo' onclick='window.location.href="http://scarletshield.rutgers.edu/suite";' src='images/logs.png' alt='ScarletShield Logo'/>
+			<div id='headLeftover'>
+				<div id='search' style='visibility:hidden'>
+					<input type='text' id='searchbox' name='searchbox'
+						placeholder='Search an IP or Attack'><!--
+					--><input type='submit' id='searchsubmit' value=' '/>
+				</div>
+				<ul id='topul'>
+          <li onclick='window.location.href="http://scarletshield.rutgers.edu/suite";'>HOME</li>
+					<li class='selected'>ANALYTICS</li>
+          <li id='map-tab' onclick='window.location.href="http://scarletshield.rutgers.edu/suite/map.html"'>MAP</li>
+          <li onclick='logOut()'>LOGOUT</li>
+				</ul>
+      </div>
+    </div>
+		</div>
+		<div id='main'>
+			<div id='sidespace'>
+				<div id='sidebar' class='shadow'>
+					<div class='indent'>
+						<h2 class='sideh2'>Sections:</h2>
+            <h3><span style='cursor:pointer' id='tc' class='fakelink underlined'>Time Analysis</span></h3>
+            <h3><span style='cursor:pointer' id='ip' class='fakelink'>Common IPs</span></h3>
+            <h3><span style='cursor:pointer' id='att' class='fakelink'>Common Attacks</span></h3>
+          </div>
+        </div>
+			</div>
+			<div id='content'>
+			
+				<div class='top-card'>
+					<center><img class='imgfix' src='images/analytics.png'/></center>
+					<div class='inner-top-card shadow'>
+						<div class='boldred'></div>
+						<h1 class='cardtitle'>Analytics</h1>
+					</div>
+				</div>
+
+        <div id='dataArea'>
+          <center><img src='images/loading.gif' style='margin-top:50px'/></center>
+          <!-- >
+          <div class='card shadow'>
+            <div class='redline'></div>
+            <div class='inner-card'>
+              <div class='iconandtext'>
+                <img class='iticon' src='images/cal.png' alt='Calendar'/>
+                <h1 class='ittext'>3/31/2014</h1>
+              </div>
+              
+              <div class='onepixline clear'></div>
+              <div class='entry'>
+                <div class='detButton'>Details</div>
+                <h2 class='entryTitle'>ssh: Protocol mismatch</h2>
+                <p class='entryDes'><span>From</span> 125.253.112.71 <span>at</span> 7:31PM</p>
+                <p class='entryDes'><span>Priority</span> 1</p>
+              </div>
+              
+              <div class='onepixline clear'></div>
+              <div class='entry'>
+                <div class='detButton'>Details</div>
+                <h2 class='entryTitle'>smtp: Attempted command buffer overflow</h2>
+                <p class='entryDes'><span>From</span> 162.248.160.26 <span>at</span> 3:25PM</p>
+                <p class='entryDes'><span>Priority</span> 1</p>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class='card shadow'>
+            <div class='redline'></div>
+            <div class='inner-card'>
+              <div class='iconandtext'>
+                <img class='iticon' src='images/cal.png' alt='Calendar'/>
+                <h1 class='ittext'>3/30/2014</h1>
+              </div>
+              
+              <div class='onepixline clear'></div>
+              <div class='entry'>
+                <div class='detButton'>Details</div>
+                <h2 class='entryTitle'>ssh: Protocol mismatch</h2>
+                <p class='entryDes'><span>From</span> 125.253.112.71 <span>at</span> 7:31PM</p>
+                <p class='entryDes'><span>Priority</span> 1</p>
+              </div>
+              
+              <div class='onepixline clear'></div>
+              <div class='entry'>
+                <div class='detButton'>Details</div>
+                <h2 class='entryTitle'>smtp: Attempted command buffer overflow</h2>
+                <p class='entryDes'><span>From</span> 162.248.160.26 <span>at</span> 3:25PM</p>
+                <p class='entryDes'><span>Priority</span> 1</p>
+              </div>
+              
+            </div>
+          </div>
+          < -->
+        </div>
+
+				
+			</div>
+		</div>
+    </body>
+    </html>

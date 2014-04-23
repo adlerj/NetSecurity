@@ -18,7 +18,8 @@ var OptionsButton = function(opsDiv, map, heatmap) {
   $(options).hide();
 
   var refresh = new TextOption('Refresh Chart Data', options);
-  var attacks = new TextOption('See past Attacks', options);
+  var suite = new TextOption('Back to the Suite', options);
+  var logout = new TextOption('Logout', options);
 
   google.maps.event.addDomListener(refresh, 'click', function() {
     $(options).slideToggle(200);
@@ -29,6 +30,12 @@ var OptionsButton = function(opsDiv, map, heatmap) {
 
   google.maps.event.addDomListener(button, 'click', function() {
     $(options).slideToggle(200);
+  });
+  google.maps.event.addDomListener(suite, 'click', function() {
+    window.location.href = 'http://scarletshield.rutgers.edu/suite';
+  });
+  google.maps.event.addDomListener(logout, 'click', function() {
+    logOut();
   });
 
   return this;

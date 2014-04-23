@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo cp index.min.js trash/ibackup.js
+sudo cat scripts/index/* scripts/shared/* | sudo uglifyjs -nc -o index.min.js

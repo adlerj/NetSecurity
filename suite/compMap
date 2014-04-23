@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo cp map.min.js trash/backup.js
+sudo cat scripts/map/* | sudo uglifyjs -nc -o map.min.js

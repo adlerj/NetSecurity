@@ -1,7 +1,7 @@
-@font-face {
-  font-family: "cambria";
-  src: url('cambria.TTC');
-}
+//@font-face {
+//  font-family: cambria;
+//  src: url('cambria.TTC');
+//}
 
 * {
 	padding: 0px;
@@ -17,15 +17,22 @@ html, body {
 header, section, footer, aside, nav, main, article, figure { 
 	display: block; 
 }
+#inner-header {
+	margin: 0px auto;
+	width: 1000px;
+  height: 100px;
+}
 
 #logo {
+  cursor: pointer;
 	float: left;
 	height: 100px;
+  width: 173px;
 }
 
 #headLeftover {
 	padding-top: 10px;
-	padding-right: 10px;
+	//padding-right: 10px;
 	height: 90px;
 	float: right;
 }
@@ -50,7 +57,7 @@ header, section, footer, aside, nav, main, article, figure {
 }
 
 #searchsubmit {
-	background-image: url('mag.png');
+	background-image: url('images/mag.png');
 	background-color: white;
 	background-repeat: no-repeat;
 	height: 30px;
@@ -72,15 +79,22 @@ header, section, footer, aside, nav, main, article, figure {
 	list-style-type: none;
 }
 
-#selected {
+.selected {
 	background-color: #f0f0f0;
 	color: black;
 }
 
-#topul :not(#selected) {
+#topul :not(.selected) {
 	cursor: pointer;
 	color: grey;
 	background-color: #cccccc;
+}
+#topul li:not(.selected):hover {
+  color: black;
+  background-color: #d8d8d8;
+
+  -webkit-transition: background-color 200ms, color 200ms linear;
+  transition: background-color 200ms, color 200ms linear;
 }
 
 #topul li {
@@ -90,7 +104,7 @@ header, section, footer, aside, nav, main, article, figure {
 	display: inline-block;
 	line-height: 40px;
 	text-align: center;
-	width: 200px;
+	width: 150px;
 }
 
 #sidespace {
@@ -182,14 +196,21 @@ header, section, footer, aside, nav, main, article, figure {
 }
 
 .detButton {
+  margin-bottom: 20px;
 	background-color: #b22324;
 	float: right;
-	height: 50px;
-	line-height: 50px;
+	height: 60px;
+	line-height: 60px;
 	width: 100px;
 	text-align: center;
 	color: white;
 	cursor: pointer;
+}
+
+.detButton:hover {
+  background-color: #580000;
+  -webkit-transition: background-color 150ms linear;
+  transition: background-color 150ms linear;
 }
 
 .entry {
@@ -209,8 +230,15 @@ header, section, footer, aside, nav, main, article, figure {
 	color: grey;
 }
 
+.entryTitle span {
+	color: red;
+}
+
 .bottom-space {
   height: 20px;
+}
+.error-space {
+  height:5px;
 }
 
 .shadow {
@@ -258,4 +286,20 @@ h2 {
 	font-family: cambria;
 	font-weight: normal;
 	font-size: x-large;
+}
+
+::-webkit-clear-button {
+  display:none;
+}
+
+::-webkit-inner-spin-button {
+  display: none;
+}
+
+.fakelink {
+  color: #b22324;
+}
+
+.underlined {
+  text-decoration: underline;
 }

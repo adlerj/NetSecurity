@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Scarletshield Access Portal</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="icon" type="image/png" href="/theme/pushpin.png" />
+
+	<link href='theme/screen.css' rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href='js/toastr/toastr.min.css'>
+
+	<script src='js/jquery.js' type="text/javascript"></script>
+	
+	
+	<script type="text/javascript" charset="utf-8" src="js/jquery.tubular.1.0.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/index.js"></script>
+	<script type="text/javascript" src='js/toastr/toastr.min.js'></script>
+	<script type="text/javascript" src="js/transition.js"></script>
+
+</head>
+<body>
+	<div id="wrapper" class="clearfix">
+		<div id="main">
+			
+			<div class="black-50">
+				<h1>Welcome to The ScarletShield Suite Gateway</h1>
+				<p>Please enter the Suite Access Key </p>
+				<form id="transition" method="post" action="mapindex.html">
+					<label>Access Key:</label>
+						<input type="password" name="password" id="password"/>
+						<input type="submit" value="Submit" name="submit" class="submit" id="submit" />
+				</form>
+			</div>		
+		</div>
+	</div>
+
+	<script>
+		toastr.options = {
+		  "closeButton": false,
+		  "debug": false,
+		  "positionClass": "toast-top-right",
+		  "onclick": null,
+		  "showDuration": "300",
+		  "hideDuration": "1000",
+		  "timeOut": "5000",
+		  "extendedTimeOut": "1000",
+		  "showEasing": "swing",
+		  "hideEasing": "linear",
+		  "showMethod": "fadeIn",
+		  "hideMethod": "fadeOut"
+		}
+
+		checkCookie();
+
+		function checkCookie()
+		{
+			var key = getCookie("accesskey");
+			if (key == "scarlet")
+  			{
+  				window.location = "suiteindex.html";
+  			}
+		}
+
+		function getCookie(cname)
+		{
+			var name = cname + "=";
+			var ca = document.cookie.split(';');
+			for(var i=0; i<ca.length; i++) 
+  			{
+  				var c = ca[i].trim();
+  				if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+  			}
+				return "";
+		}	
+
+		setTimeout(
+			function() 
+  			{
+				toastr.info(" Brought to you by the ScarletShield Team", "Heat Map Viewer")
+			}, 10000);
+	</script>
+</body>
+</html>

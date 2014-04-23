@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo cp analytics.min.js trash/abackup.js
+sudo cat scripts/analytics/* scripts/shared/* | sudo uglifyjs -nc -o analytics.min.js
