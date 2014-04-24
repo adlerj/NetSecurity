@@ -1,5 +1,3 @@
-
-
 /*
  * The Analytics class. Starts up our analytics in the div with id equal
  * to dataArea. Use Analytics.init() to kick off the process.
@@ -29,9 +27,6 @@ Analytics.prototype.init = function() {
   // Create common attacks thing
   var att = this.createCommonAttacks();
 
-  // Create common Locations
-  this.createCommonLocations();
-
   // Hotlinks to divs.
   this.hotlinks(tc, ip, att);
 }
@@ -39,35 +34,15 @@ Analytics.prototype.init = function() {
 
 /*
  * Creates the first box, the time chart, for the Analytics class.
+ * Uses Google Charts Chart Control on a Column Graph to map out
+ * all the attacks according to the day they were created.
  */
 Analytics.prototype.createTimeChart = function() {
   var card = document.createElement('div');
   card.classList.add('card', 'shadow');
   this.container.appendChild(card);
 
-  var redline = document.createElement('div');
-  redline.className = 'redline';
-  card.appendChild(redline);
-
-  var innerCard = document.createElement('div');
-  innerCard.className = 'inner-card';
-  card.appendChild(innerCard);
-
-  var iconandtext = document.createElement('div');
-  iconandtext.className = 'iconandtext';
-  iconandtext.style.width = '50%';
-  innerCard.appendChild(iconandtext);
-
-  var iticon = document.createElement('img');
-  iticon.className = 'iticon';
-  iticon.src = 'images/pie.png';
-  iticon.alt = 'Mmm... pie.';
-  iconandtext.appendChild(iticon);
-
-  var ittext = document.createElement('h1');
-  ittext.className = 'ittext';
-  ittext.innerHTML = 'Time Analysis';
-  iconandtext.appendChild(ittext);
+  var innerCard = this.initCard(card);
 
   var line = document.createElement('div');
   line.classList.add('onepixline', 'clear');
@@ -134,7 +109,6 @@ Analytics.prototype.createTimeChart = function() {
   data.addColumn('date', 'Date');
   data.addColumn('number', 'Number of Attacks');
 
-
   var hash = {};
   var i;
   for (i = 0; i < this.data.length; ++i) {
@@ -143,10 +117,7 @@ Analytics.prototype.createTimeChart = function() {
     var year = Number(splitDate[0]);
     var month = Number(splitDate[1]);
     var day = Number(splitDate[2]);
-    var hour = Number(splitDate[3]);
-    var minutes = Number(splitDate[4]);
-    var seconds = Number(splitDate[5]);
-    var curDate = new Date(year, month-1, day, 0, 0, 0, 0);
+    var curDate = year + ' ' + month + ' ' + day;
     if (hash[curDate]) {
       hash[curDate]++;
     } else {
@@ -166,11 +137,182 @@ Analytics.prototype.createTimeChart = function() {
   return card;
 }
 
+
+/*
+ * Shows a pie chart all the IP addresses weighing how
+ * often they show up. After this, we add on the five most
+ * common ones along with some details about them.
+ */
 Analytics.prototype.createCommonIPs = function() {
+
   var card = document.createElement('div');
   card.classList.add('card', 'shadow');
   this.container.appendChild(card);
 
+  var innerCard = this.initCard(card);
+
+  var hash = {};
+  var i;
+  for (i = 0; i < this.data.length; ++i)  {
+    var cur = this.data[i];
+    if (cur.src.indexOf('128.6.238') !==  -1) {
+      continue;
+    }
+    if (hash[cur.src]) {
+      hash[cur.src]++;
+    } else {
+      hash[cur.src] = 1;
+    }
+  }
+  
+  var data = new google.visualization.DataTable();
+  data.addColumn('string', 'IP Address');
+  data.addColumn('number', 'Number of Occurrences');
+
+  for (i in hash) {
+    if (hash[i]) {
+      data.addRow([i, hash[i]]);
+    }
+  }
+  var options = {
+    title: 'IP Address Occurences'
+  };
+  var divi = document.createElement('div');
+  divi.classList.add('onepixline', 'clear');
+  innerCard.appendChild(divi);
+
+  var pie = document.createElement('div');
+  pie.className = 'entry';
+  pie.style.height = '500px';
+  innerCard.appendChild(pie);
+
+  var chart = new google.visualization.PieChart(pie);
+  chart.draw(data, options);
+
+  for (i = 0; i < 5; ++i) {
+    var j, max = 0, maxIndex = -1;
+    for (j in hash) {
+      if (hash[j] > max) {
+        max = hash[j];
+        maxIndex = j;
+      }
+    }
+    
+    var line = document.createElement('div');
+    line.classList.add('onepixline', 'clear');
+    innerCard.appendChild(line);
+
+    var entry = document.createElement('div');
+    entry.className = 'entry';
+    innerCard.appendChild(entry);
+
+    var title = document.createElement('h2');
+    title.className = 'entryTitle';
+    title.innerHTML = maxIndex;
+    entry.appendChild(title);
+
+    var info = document.createElement('p');
+    info.className = 'entryDes';
+    info.innerHTML = '<span>With</span> ' + max + ' <span>associated attack records.</span>';
+    entry.appendChild(info);
+
+    hash[maxIndex] = undefined;
+  }
+
+  return card;
+}
+
+
+/*
+ * Creates a way to see the most common attacks. Shows a
+ * pie chart of all values as well as listing the top
+ * five underneath with some details.
+ */
+Analytics.prototype.createCommonAttacks = function() {
+  var card = document.createElement('div');
+  card.classList.add('card', 'shadow');
+  this.container.appendChild(card);
+
+  var innerCard = this.initCard(card);
+
+  var hash = {};
+  var i;
+  for (i = 0; i < this.data.length; ++i)  {
+    var cur = this.data[i];
+    if (cur.src.indexOf('128.6.238') !==  -1) {
+      continue;
+    }
+    if (hash[cur.msg]) {
+      hash[cur.msg]++;
+    } else {
+      hash[cur.msg] = 1;
+    }
+  }
+
+
+  var data = new google.visualization.DataTable();
+  data.addColumn('string', 'Name of Attack');
+  data.addColumn('number', 'Number of Occurrences');
+
+  for (i in hash) {
+    if (hash[i]) {
+      data.addRow([i, hash[i]]);
+    }
+  }
+  var options = {
+    title: 'Attack Occurences'
+  };
+  var divi = document.createElement('div');
+  divi.classList.add('onepixline', 'clear');
+  innerCard.appendChild(divi);
+
+  var pie = document.createElement('div');
+  pie.className = 'entry';
+  pie.style.height = '500px';
+  innerCard.appendChild(pie);
+
+  var chart = new google.visualization.PieChart(pie);
+  chart.draw(data, options);
+
+  for (i = 0; i < 5; ++i) {
+    var j, max = 0, maxIndex = -1;
+    for (j in hash) {
+      if (hash[j] > max) {
+        max = hash[j];
+        maxIndex = j;
+      }
+    }
+    
+    var line = document.createElement('div');
+    line.classList.add('onepixline', 'clear');
+    innerCard.appendChild(line);
+
+    var entry = document.createElement('div');
+    entry.className = 'entry';
+    innerCard.appendChild(entry);
+
+    var title = document.createElement('h2');
+    title.className = 'entryTitle';
+    title.innerHTML = maxIndex;
+    entry.appendChild(title);
+
+    var info = document.createElement('p');
+    info.className = 'entryDes';
+    info.innerHTML = '<span>With</span> ' + max + ' <span>associated records.</span>';
+    entry.appendChild(info);
+
+    hash[maxIndex] = undefined;
+  }
+
+  return card;
+}
+
+
+/*
+ * A helper class to start up the creation of a card since it
+ * is so common.
+ */
+Analytics.prototype.initCard = function(card) {
   var redline = document.createElement('div');
   redline.className = 'redline';
   card.appendChild(redline);
@@ -195,306 +337,15 @@ Analytics.prototype.createCommonIPs = function() {
   ittext.innerHTML = 'Common IPs';
   iconandtext.appendChild(ittext);
 
-
-  var hash = {};
-  var i;
-  for (i = 0; i < this.data.length; ++i)  {
-    var cur = this.data[i];
-    if (cur.src.indexOf('128.6.238') !==  -1) {
-      continue;
-    }
-    if (hash[cur.src]) {
-      hash[cur.src]++;
-    } else {
-      hash[cur.src] = 1;
-    }
-  }
-
-  var hash2 = [];
-  var max = 0;
-  for (j in hash) {
-    if (hash2[hash[j]]) {
-      hash2[hash[j]].push(j);
-    } else {
-      hash2[hash[j]] = [];
-      hash2[hash[j]].push(j);
-    }
-    if (max < hash[j]) {
-      max = hash[j];
-    }
-  }
-
-
-  var data = new google.visualization.DataTable();
-  data.addColumn('string', 'IP Address');
-  data.addColumn('number', 'Number of Occurrences');
-
-  for (i = max; i >=0; --i) {
-    if (hash2[i]) {
-      var j;
-      for (j in hash2[i]) {
-        data.addRow([hash2[i][j], i]);
-      }
-    }
-  }
-  var options = {
-    title: 'IP Address Occurences'
-  };
-  var divi = document.createElement('div');
-  divi.classList.add('onepixline', 'clear');
-  innerCard.appendChild(divi);
-
-  var pie = document.createElement('div');
-  pie.className = 'entry';
-  pie.style.height = '500px';
-  innerCard.appendChild(pie);
-
-  var chart = new google.visualization.PieChart(pie);
-  chart.draw(data, options);
-
-
-  var numDone = 0;
-  for (i = max; i >= 0; --i) {
-    if (hash2[i]) {
-      console.log(i);
-      //console.log(hash2[i]);
-      var line = document.createElement('div');
-      line.classList.add('onepixline', 'clear');
-      innerCard.appendChild(line);
-
-      var entry = document.createElement('div');
-      entry.className = 'entry';
-      innerCard.appendChild(entry);
-
-      var title = document.createElement('h2');
-      title.className = 'entryTitle';
-      title.innerHTML = hash2[i][0];
-      entry.appendChild(title);
-
-      var info = document.createElement('p');
-      info.className = 'entryDes';
-      info.innerHTML = '<span>With</span> ' + i + ' <span>associated attack records.</span>';
-      entry.appendChild(info);
-      numDone++;
-      if (numDone >= 5) {
-        break;
-      }
-    }
-  }
-
-  for (i = 0; i < 0; ++i) {
-    var line = document.createElement('div');
-    line.classList.add('onepixline', 'clear');
-    innerCard.appendChild(line);
-
-    var entry = document.createElement('div');
-    entry.className = 'entry';
-    innerCard.appendChild(entry);
-
-    var det = document.createElement('div');
-    det.className = 'detButton';
-    det.innerHTML = 'Details';
-    entry.appendChild(det);
-
-    var title = document.createElement('h2');
-    title.className = 'entryTitle';
-    title.innerHTML = cur.msg;
-    entry.appendChild(title);
-
-    var info = document.createElement('p');
-    info.className = 'entryDes';
-    var m = 'AM';
-    if (hour === 0) {
-      hour = '12';
-    } else if (hour > 12) {
-      hour = hour - 12;
-      m = 'PM'
-    }
-    if (minutes < 10) {
-      minutes = '0' + minutes;
-    }
-    if (seconds < 10) {
-      seconds = '0' + seconds;
-    }
-    info.innerHTML = '<span>From</span> ' + cur.src + ' <span>at</span> ' + hour + ':' + minutes + ':' + seconds + m;
-    entry.appendChild(info);
-
-    var prio = document.createElement('p');
-    prio.className = 'entryDes';
-    prio.innerHTML = '<span>Priority</span> ' + cur.priority;
-    entry.appendChild(prio);
-  }
-
-  return card;
-}
-
-Analytics.prototype.createCommonAttacks = function() {
-  var card = document.createElement('div');
-  card.classList.add('card', 'shadow');
-  this.container.appendChild(card);
-
-  var redline = document.createElement('div');
-  redline.className = 'redline';
-  card.appendChild(redline);
-
-  var innerCard = document.createElement('div');
-  innerCard.className = 'inner-card';
-  card.appendChild(innerCard);
-
-  var iconandtext = document.createElement('div');
-  iconandtext.className = 'iconandtext';
-  iconandtext.style.width = '50%';
-  innerCard.appendChild(iconandtext);
-
-  var iticon = document.createElement('img');
-  iticon.className = 'iticon';
-  iticon.src = 'images/pie.png';
-  iticon.alt = 'Mmm... pie.';
-  iconandtext.appendChild(iticon);
-
-  var ittext = document.createElement('h1');
-  ittext.className = 'ittext';
-  ittext.innerHTML = 'Common Attacks';
-  iconandtext.appendChild(ittext);
-
-
-  var hash = {};
-  var i;
-  for (i = 0; i < this.data.length; ++i)  {
-    var cur = this.data[i];
-    if (cur.src.indexOf('128.6.238') !==  -1) {
-      continue;
-    }
-    if (hash[cur.msg]) {
-      hash[cur.msg]++;
-    } else {
-      hash[cur.msg] = 1;
-    }
-  }
-
-  var hash2 = [];
-  var max = 0;
-  for (j in hash) {
-    if (hash2[hash[j]]) {
-      hash2[hash[j]].push(j);
-    } else {
-      hash2[hash[j]] = [];
-      hash2[hash[j]].push(j);
-    }
-    if (max < hash[j]) {
-      max = hash[j];
-    }
-  }
-  var data = new google.visualization.DataTable();
-  data.addColumn('string', 'Name of Attack');
-  data.addColumn('number', 'Number of Occurrences');
-
-  for (i = max; i >=0; --i) {
-    if (hash2[i]) {
-      var j;
-      for (j in hash2[i]) {
-        data.addRow([hash2[i][j], i]);
-      }
-    }
-  }
-  var options = {
-    title: 'Attack Occurences'
-  };
-  var divi = document.createElement('div');
-  divi.classList.add('onepixline', 'clear');
-  innerCard.appendChild(divi);
-
-  var pie = document.createElement('div');
-  pie.className = 'entry';
-  pie.style.height = '500px';
-  innerCard.appendChild(pie);
-
-  var chart = new google.visualization.PieChart(pie);
-  chart.draw(data, options);
-
-  var numDone = 0;
-  for (i = max; i >= 0; --i) {
-    if (hash2[i]) {
-      console.log(i);
-    var line = document.createElement('div');
-    line.classList.add('onepixline', 'clear');
-    innerCard.appendChild(line);
-
-    var entry = document.createElement('div');
-    entry.className = 'entry';
-    innerCard.appendChild(entry);
-
-    var title = document.createElement('h2');
-    title.className = 'entryTitle';
-    title.innerHTML = hash2[i][0];
-    entry.appendChild(title);
-
-    var info = document.createElement('p');
-    info.className = 'entryDes';
-    info.innerHTML = '<span>With</span> ' + i + ' <span>associated records.</span>';
-    entry.appendChild(info);
-      numDone++;
-      if (numDone >= 5) {
-        break;
-      }
-    }
-  }
-
-  for (i = 0; i < 0; ++i) {
-    var line = document.createElement('div');
-    line.classList.add('onepixline', 'clear');
-    innerCard.appendChild(line);
-
-    var entry = document.createElement('div');
-    entry.className = 'entry';
-    innerCard.appendChild(entry);
-
-    var det = document.createElement('div');
-    det.className = 'detButton';
-    det.innerHTML = 'Details';
-    entry.appendChild(det);
-
-    var title = document.createElement('h2');
-    title.className = 'entryTitle';
-    title.innerHTML = cur.msg;
-    entry.appendChild(title);
-
-    var info = document.createElement('p');
-    info.className = 'entryDes';
-    var m = 'AM';
-    if (hour === 0) {
-      hour = '12';
-    } else if (hour > 12) {
-      hour = hour - 12;
-      m = 'PM'
-    }
-    if (minutes < 10) {
-      minutes = '0' + minutes;
-    }
-    if (seconds < 10) {
-      seconds = '0' + seconds;
-    }
-    info.innerHTML = '<span>From</span> ' + cur.src + ' <span>at</span> ' + hour + ':' + minutes + ':' + seconds + m;
-    entry.appendChild(info);
-
-    var prio = document.createElement('p');
-    prio.className = 'entryDes';
-    prio.innerHTML = '<span>Priority</span> ' + cur.priority;
-    entry.appendChild(prio);
-  }
-
-  return card;
+  return innerCard;
 }
 
 
 /*
- * Creates the finder for common locations -- unimplemented as of now.
+ * A class that starts up the hotlinks functionality: scrolling
+ * to the section when it is clicked and as the user is scrolling,
+ * update which section we are in with an underline.
  */
-Analytics.prototype.createCommonLocations = function() {
-
-}
-
-
 Analytics.prototype.hotlinks = function(tc, ip, att) {
   var hottc = document.getElementById('tc');
   var hotip = document.getElementById('ip');
@@ -534,5 +385,3 @@ Analytics.prototype.hotlinks = function(tc, ip, att) {
     return false;
   });
 }
-
-

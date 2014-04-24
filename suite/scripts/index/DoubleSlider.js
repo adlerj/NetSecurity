@@ -1,9 +1,33 @@
 
 /*
- * DoubleSlider class. Takes an element and creates it into a slider.
+ * DoubleSlider class. Takes the container that we passed in
+ * and makes it into a slider with min and max set according
+ * to the arguments.
  */
-var DoubleSlider = function(container, min, max, width, height, handleRadius) {
+var DoubleSlider = function(container, min, max) {
+
+  // hg is the variable that keeps the associated HistoryGenerator
+  // that this slider is affecting. Null for now but will be set
+  // later.
   this.hg = null;
+  this.container = container;
+  this.min = min;
+  this.max = max;
+
+  this.init()
+
+  return this;
+}
+
+
+/*
+ * Initializes the slider by creating all elements and event
+ * listeners.
+ */
+DoubleSlider.prototype.init = function() {
+  var container = this.container;
+  var min = this.min;
+  var max = this.max;
 
 	var sliderBar = document.createElement('div');
 	sliderBar.className = 'slidebar';
@@ -110,9 +134,14 @@ var DoubleSlider = function(container, min, max, width, height, handleRadius) {
 	}
 	updateText();
 	container.appendChild(text);
-  return this;
-}
 
+};
+
+
+/*
+ * When our HistoryGenerator is created, this is a funtion that
+ * should be called so that this slider is able to talk to it.
+ */
 DoubleSlider.prototype.registerHG = function(hg) {
   this.hg = hg;
 }

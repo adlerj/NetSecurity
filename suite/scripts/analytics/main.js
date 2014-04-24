@@ -1,4 +1,9 @@
 
+/*
+ * Once we get the request, we want to use that information to
+ * generate the cards for the client to view. Our Analytics class
+ * takes care of this. It comes with some functions we should call to initialize it.
+ */
 var processData = function() {
   return function() {
     var response = JSON.parse(this.responseText);
@@ -8,26 +13,11 @@ var processData = function() {
 }
 
 
-
-var initPageUp = function() {
-  var pageup = document.getElementById('pageup');
-  pageup.style.marginLeft = '-100px';
-  pageup.style.marginTop = window.innerHeight - 150 + 'px';
-
-  var applyMouseUp = function(callback) {
-    pageup.onmouseup = callback
-  }
-  var func = function(e) {
-    scrollTo(document.body, 0, 500);
-    setTimeout(applyMouseUp, 500, func);
-  };
-  applyMouseUp(func);
-  pageup.addEventListener('click', function() {pageup.onmouseup = null;});
-  window.onresize = function() {
-    pageup.style.marginTop = window.innerHeight - 150 + 'px';
-  };
-}
-
+/*
+ * Function that takes care of setting up the
+ * pageup button animation into screen and the sidebar
+ * sticking to the page after a certain point.
+ */
 var registerScroll = function() {
   var content = document.getElementById('content');
   var bottom = document.createElement('div');
@@ -65,6 +55,9 @@ var registerScroll = function() {
 }
 
 
+/*
+ * Entry point of the program.
+ */
 var init = function() {
   initPageUp();
   registerScroll();
@@ -73,8 +66,6 @@ var init = function() {
   var addr = 'http://scarletshield.rutgers.edu/demo/pulltest.php';
   get(addr, callback);
 }
-
-
 
 // Load the Google Charts Library.
 google.load('visualization', '1.1', {packages: ['corechart', 'controls']});
