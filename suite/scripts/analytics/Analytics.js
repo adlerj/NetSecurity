@@ -42,7 +42,7 @@ Analytics.prototype.createTimeChart = function() {
   card.classList.add('card', 'shadow');
   this.container.appendChild(card);
 
-  var innerCard = this.initCard(card);
+  var innerCard = this.initCard(card, 'Time Analysis');
 
   var line = document.createElement('div');
   line.classList.add('onepixline', 'clear');
@@ -149,7 +149,7 @@ Analytics.prototype.createCommonIPs = function() {
   card.classList.add('card', 'shadow');
   this.container.appendChild(card);
 
-  var innerCard = this.initCard(card);
+  var innerCard = this.initCard(card, 'Common IPs');
 
   var hash = {};
   var i;
@@ -233,7 +233,7 @@ Analytics.prototype.createCommonAttacks = function() {
   card.classList.add('card', 'shadow');
   this.container.appendChild(card);
 
-  var innerCard = this.initCard(card);
+  var innerCard = this.initCard(card, 'Common Attacks');
 
   var hash = {};
   var i;
@@ -312,7 +312,7 @@ Analytics.prototype.createCommonAttacks = function() {
  * A helper class to start up the creation of a card since it
  * is so common.
  */
-Analytics.prototype.initCard = function(card) {
+Analytics.prototype.initCard = function(card, title) {
   var redline = document.createElement('div');
   redline.className = 'redline';
   card.appendChild(redline);
@@ -334,7 +334,7 @@ Analytics.prototype.initCard = function(card) {
 
   var ittext = document.createElement('h1');
   ittext.className = 'ittext';
-  ittext.innerHTML = 'Common IPs';
+  ittext.innerHTML = title;
   iconandtext.appendChild(ittext);
 
   return innerCard;
