@@ -3,7 +3,7 @@
 % Val Red, Eric Cuiffo, Jeff Adler, Parth Desai, Jeff Rabinowitz
 % All rights reserved.
 
-\documentclass[11.5pt,letterpaper,titlepage]{report}
+\documentclass[12pt,letterpaper,titlepage]{report}
 
 
 \usepackage[margin=1in]{geometry}
@@ -107,6 +107,7 @@ Dr. Manish \textsc{Parashar} % Supervisor's Name
 
 \end{titlepage}
 
+
 \tableofcontents
 \pagebreak
 
@@ -122,6 +123,8 @@ Dr. Manish \textsc{Parashar} % Supervisor's Name
 \newabbrev{\ctwo}{Command-and-control (C2)}[C2]
 \newabbrev{\distros}{distributions (distros)}[distros]
 
+{
+\setlength{\parskip}{1em}
 \chapter{Abstract}
 
 \scarletshield is a customized Ubuntu 12.04 LTS image featuring a uniquely
@@ -235,18 +238,87 @@ and fail2ban while also boasting a breadth of options such as iptables handling
 and dropping of malicious sources’ packets while interfacing with other gateways
 and subnets to maximize overall security in a network.
 
+\chapter{Hardware and Software Architecture}
+
+\section{Evaluation of System Hardware}
+
+Scarletshield in its current manifestation runs in the 
+Microway server described below. 
+Note how the hardware is actually dated by today’s standards;
+this exemplifies the scalability of Scarletshield -- it does not actually require
+a high-end server to operate efficiently, but can actually operate on smaller
+devices as well. A more detailed study of scalability factors occurs in Chapter 4.
+
+\begin{table}
+\centering
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|c|c|}
+\hline
+Chipset & ASUSTek Computer INC. K8N-DRE \\ \hline
+CPU & 2x Dual Core AMD Opteron(tm) 275 : 2.2GHz 2x1 MB L2 Cache \\ \hline 
+RAM & 4x8GB \\ \hline
+OS & Ubuntu 12.04 LTS \\ \hline
+HDD & 60GB HDD \\ \hline
+Network Card & 2x NetXtreme BCM5721 Gigabit Ethernet PCI Express \\ \hline
+\end{tabular}
+\caption{The hardware specifications for the Microway Server provided by
+Rutgers Engineering Computing Services (ECS).}
+\end{table}
+
+The largest performance factor when deploying the server for monitoring gateways
+is the Network Card.  In the small, local, web-facing
+network we employed, a one-gigabit network card was sufficient enough to handle
+all requests and still have Scarletshield simultaneously replicate and check the
+requests against our IDS and IPS configuration. However, 
+for maximum scalability, a network administrator should mind
+the network card being used, and if a Scarletshield-esque design is to be employed, 
+also ensure that a second network card is present
+to facilitate DHCP and network connectivity for local machines within the
+network. 
+
+
+\section{System Software Architecture}
+
+As shown below, Scarletshield is composed of two interfacing subsystems -- 
+a packet inspection and logging system, composed of Snort, Barnyard2, Pulled Pork,
+fail2ban, and iptables; and a web-based administrator suite powered by Drupal.
+These two systems are married by a MySQL server, which holds both Snort's configurations,
+as well as the attack logs. 
+
+The Administration Suite utilizes Drupal, a Content Management System (CMS),
+not only for its maturity, but also for its modularity and extensibility; 
+PHP scripts can be added to Drupal's configuration and then served to web clients
+with minimal effort.
+This is actually how the Scarletshield Administration Suite operates -- through a
+series of modular PHP scripts furnished to Drupal. This minimalistic approach has
+the advantage that adding a new page to the suite  is as simple as writing another
+script and providing it to Drupal. In this way, Scarletshield can be customized
+by end users to meet individualized needs.
+
+
+\begin{figure}[h]
+\centering
+  \includegraphics{./scarlet-shield-diagram2.pdf}
+  \caption{The architecture of Scarletshield. Incoming packets are routed
+  through iptables, where they may be blocked per iptables' rule-set; Snort receives
+  the packets and inspects them for signatures of attacks; offending packets are 
+  mirrored via Barnyard2 into a MySQL database; users can access the Administrator
+  Suite provided by Scarletshield and hosted using Drupal in order to analyze
+  attacks against the system; fail2ban automatically bans abusive foreign hosts. 
+  Pulled Pork is used to automatically update Snort's classification rulesets
+  for offending packet patterns.}
+\end{figure}
+
 \chapter{Approach and Methodology}
 
 As we are designing Scarletshield from scratch with a Ubuntu 12.04 LTS server,
-there are several of sub-sections of our Approach and Methodology:
+there are several sections to our Approach and Methodology:
 
 \begin{enumerate}
+\itemsep0em
 \item Approach
 \item Secure Server SSH
 \item Set up of Snort and fail2ban
-\item Integration of web front-end
-\item Analytics
-\item Response Options
 \end{enumerate}
 
 \section{Approach}
@@ -266,14 +338,16 @@ addresses preventively, requiring no action from the administrator.
 \section{Securing SSH}
 
 Through our research as a group, we came to the conclusion that the safest way
-to protect our ssh server against brute forcing would be to change our SSH’s
-port from 22 to create security through obscurity.  However, due to the nature
-of our research being obscure would not allow us to gather a good pool of log
-data.  This led us to a different approach of setting up two factor
-authentication.  By utilizing Google’s Google Authenticator API, to successfully
-gain access to ScarletShield’s SSH server one must first enter the correct
-password, and the unique TOTP security token from RFC6238 generated by the
-google authenticator app for the specific user trying to login.  This security
+to protect our SSH  server against brute forcing would be to change our SSH’s
+port from 22 to create security through obscurity.  However, 
+in order to gather the largest possible set of logged attack data,
+we needed to present SSH on its standard port.
+This led us to a different approach of setting up two-factor
+authentication.  By utilizing Google’s ``Google Authenticator API'', 
+in order to successfully
+gain access to ScarletShield’s SSH server, one must first enter the correct
+password and the unique TOTP security token, described by RFC6238 and generated by the
+``Google Authenticator'' app, for the specific user trying to login.  This security
 measure makes it impossible for a malicious user to gain login access through
 brute fore.
 
@@ -310,18 +384,7 @@ database and correctly install and configure its respective libraries and server
 application.  Due to how fully featured it has become over the years, we chose
 MySQL.
 
-\begin{figure}[h]
-\centering
-  \includegraphics{./scarlet-shield-diagram2.pdf}
-  \caption{The architecture of Scarletshield. Incoming packets are routed
-  through iptables, where they may be blocked per iptables' rule-set; Snort receives
-  the packets and inspects them for signatures of attacks; offending packets are 
-  mirrored via Barnyard2 into a MySQL database; users can access the Administrator
-  Suite provided by Scarletshield and hosted using Drupal in order to analyze
-  attacks against the system; fail2ban automatically bans abusive foreign hosts. 
-  Pulled Pork is used to automatically update Snort's classification rulesets
-  for offending packet patterns.}
-\end{figure}
+
 
 Once Snort and the database being used are installed, the user must then acquire
 and/or update the Snort rule-set, which is essentially how Snort is able to parse
@@ -332,6 +395,8 @@ administrator must interface Snort with the MySQL database.  As of Snort
 2.9.3.0, the latest stable version available for Ubuntu 12.04 LTS, it is
 required to install the application ``Barnyard2'' for a Snort daemon to record
 information into the MySQL database created by a user.
+
+\chapter{Administration Suite \& Features}
 
 \section{Web Front-end Integration}
 
@@ -349,16 +414,17 @@ the logs stored by Scarletshield. The link for the Scarletshield Suite is
 written for the Chrome browser, and some small details will not work on other
 browsers.}
 
+\begin{figure}[bth]
+\centering
+  \includegraphics[height=8cm]{./login.png}
+  \caption{The Scarletshield Suite login page.}
+\end{figure}
+
 When a user tries to access any page of the suite, a JavaScript function runs to
 see if the user has an active login cookie with the correct password (the
 password is ``scarlet'').  If the user does not have this cookie, they are
 redirected to the suite login page seen below.
 
-\begin{figure}[h!]
-\centering
-  \includegraphics[height=8cm]{./login.png}
-  \caption{The Scarletshield Suite login page.}
-\end{figure}
 
 The login page makes use of two JQuery packages.  The first package,
 ``Tubular'', allows a streamed video to be the page background.  The other
@@ -373,7 +439,7 @@ server, a screen similar to the one shown below is displayed.
 
 \section{Analytics}
 
-\begin{figure}[h!]
+\begin{figure}[b!]
 \centering
   \includegraphics[height=8cm]{./history.png}
   \caption{The Scarletshield Suite Attack History page.}
@@ -392,7 +458,7 @@ more than one IP address), the ID number of the occurrence, and approximate
 location of the attack are expanded.
 
 
-\begin{figure}[h!]
+\begin{figure}[t!]
 \centering
   \includegraphics[height=8cm]{./historydet.png}
   \caption{The Scarletshield Suite Attack History page, with an expanded
@@ -410,7 +476,7 @@ and by having it presented via an admin-accessible private frontend, not only
 could administrators react quicker, but even less-skilled users could discover
 and report an ongoing attack.
 
-\begin{figure}[h!]
+\begin{figure}[b!]
 \centering
   \includegraphics[height=8cm]{./timeanalysis.png}
   \caption{A chart of the rate of attacks over a certain interval. Users
@@ -468,18 +534,41 @@ an administrator response suite.
 
 During this semester, we achieved the following goals:
 
-\begin{enumerate}
-\item Deployed a Ubuntu 12.04 LTS server with Apache, MySQL, Php, Drupal, Snort,
-		Pulled Pork, Barnyard2, fail2ban, and integrated them with iptables
-\item Configured Snort to update via Pulled Pork and to log to MySQL via Barnyard2
-\item Established initial rules and filters for Snort and Fail2ban
-\item Utilized PHP scripts to build monitoring and analysis suite into Drupal
-\item Provided dynamic and user-friendly analytics charting and mapping tools
-\end{enumerate}
+%\begin{enumerate}
+%\item Deployed a Ubuntu 12.04 LTS server with Apache, MySQL, Php, Drupal, Snort,
+%		Pulled Pork, Barnyard2, fail2ban, and integrated them with iptables
+%\item Configured Snort to update via Pulled Pork and to log to MySQL via Barnyard2
+%\item Established initial rules and filters for Snort and Fail2ban
+%\item Utilized PHP scripts to build monitoring and analysis suite into Drupal
+%\item Provided dynamic and user-friendly analytics charting and mapping tools
+%\end{enumerate}
 
-Overall, we’ve made great strides in rounding out the backend for Scarletshield; 
-we additionally have the basic framework established for Scarletshield, with a 
-good number of scripts and visualization tools to assist a network administrator.
+Our work in integrating the Snort IDS, fail2ban IPS, and iptables within the 
+\url{http://scarletshield.rutgers.edu} web server has culminated in the final 
+development and release of a robust frontend, the Scarletshield Suite, which is
+available via \url{http://scarletshield.rutgers.edu/suite} with the password 
+“scarlet”. Our overall framework presents a great proof-of-concept for an open-source
+solution for network security that can be applicable to small-time enterprises and
+individuals who would not prefer to invest in a proprietary or commercial IDS or IPS. 
+
+To exemplify how effective our work in Scarletshield has been this semester, 
+Rutgers Engineering Computing Services (ECS) has tasked system administrator 
+Val A. Red with replicating the Scarletshield Suite for internal use to monitor 
+wireless access point gateways. 
+
+\section{Cost/Sustainability Analysis and Scalability}
+
+In spite of existing in an aged Microway rackmount server, the primary component 
+necessary for utilizing Scarletshield on a network gateway is the Network Card.  While a 
+dedicated rackmount server is a costly investment, much of the hardware that 
+Scarletshield actually runs off of is dated and can be purchased for very 
+cheap prices off the shelf.  One of its most important elements, a NetXtreme 
+BCM5721 Gigabit Ethernet PCI Express card, actually goes for \$15-\$70 (depending 
+on where you look, and on whether it is used or refurbished). 
+
+Scarletshield in its current manifestation operates off of a Microway rackmount 
+server.  An equivalent, but modern-day, rackmount server would range between 
+\$2,000-\$5,000, which would be a large investment. 
 
 \section{Future Work}
 
@@ -532,7 +621,7 @@ can be installed in managed switch servers.
 %\label{fig:part2}
 %\caption{Sample frequency band gain values.}
 %\end{figure*}
-
+}
 \printbibliography
 
 \end{document}
