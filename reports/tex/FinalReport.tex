@@ -13,7 +13,8 @@
 \usepackage{graphicx}
 \usepackage{subfig}
 \usepackage{titling}
-\usepackage[utf8]{inputenc}
+\usepackage{fontspec}
+%\usepackage[utf8]{inputenc}
 \usepackage{csquotes}
 \usepackage[style=ieee,backend=biber,bibencoding=utf8]{biblatex}
 	\addbibresource{citations.bib}
@@ -35,6 +36,12 @@
 }%
 
 \usepackage{abbrevs}
+\usepackage{minted}
+
+\setsansfont{Calibri}
+\setmonofont{Consolas}
+\renewcommand{\theFancyVerbLine}{
+  \sffamily\textcolor[rgb]{0.5,0.5,0.5}{\scriptsize\arabic{FancyVerbLine}}}
 
 \begin{document}
 % This inserts the Title, Author, and Date here.
@@ -214,7 +221,11 @@ essentially sniffs all types of Internet Protocol (IP) packets (TCP, UDP, ICMP,
 etc.), and checks against patterns, or \emph{rules} and \emph{signatures} indicative of an
 attack.  This is reinforced even further by the log-inspection capabilities of
 fail2ban, which can essentially pattern-match very common exploits and \dos
-traces against typical protocols such as HTTP, SSH, and FTP and react by
+traces against typical protocols such as HTTP, SSH
+(Secure SHell, which we utilize to remotely access and work on the Scarletshield server)
+, and FTP 
+(File Transfer Protocol, commonly used for storing and transferring files from a remote server)
+and react by
 blocking IP addresses logged via ``iptables'', a powerful firewall built into most
 modern Linux \distros.
 
@@ -309,6 +320,86 @@ by end users to meet individualized needs.
   for offending packet patterns.}
 \end{figure}
 
+Scarletshield was implemented behind a Ubuntu 12.04 LTS Server edition for
+purposes of stability and universality.  In addition, the “LTS” acronym stands
+for Long Term Support, a term coined by Canonical, the developers of Ubuntu,
+that essentially means that they are supporting and supplying security updates
+for the Ubuntu 12.04 LTS for five years from its release date.  Ubuntu 12.04 LTS was
+released in April of 2012 (hence, it is version 12.04) and thus Scarletshield will
+have a completely secure operating system until April 2017.  Note, however, that
+most of the subsystem software components to be listed in this section are
+cross-platform, and thus compatible with other contemporary Linux distros and
+even modern Windows operating systems to an extent.  This speaks to the
+scalability of the Scarletshield concept, which will be discussed in a later
+chapter.
+
+Specifically, here is a breakdown of each component that builds the full
+software architecture behind Scarletshield, starting with Snort followed by each
+successive in the diagram component:
+
+\begin{enumerate}
+\item Snort 2.9.X (2.9.3 is used for Scarletshield) -- A free and open source IDS
+developed by Sourcefire, Inc. suited towards network intrusion prevention,
+which is one of the core functions behind Scarletshield.  Snort works by creating a
+separate, virtual and promiscuous (meaning that all packets received by
+Snort’s separate interface gets directed to the central processing unit for
+inspection) interface that copies traffic off of the network card as it is
+received, enabling the simultaneous inspection of packets as they reach
+their intended destination in a timely manner.  This means that
+Scarletshield is able to inspect packets without creating any latency or
+overhead experienced by clients actually intended to receive said packets,
+since Snort is only inspecting carbon copies of said packets, instead of
+the actual packets, as they pass through Scarletshield. To work effectively
+and stay up to date with the latest updates, Snort utilizes a ruleset of
+known and relevant exploits and employs pattern-matching to catch packets
+suspected of malicious activity.  How is Snort kept up to date?  It uses
+another critical component for updating known as Pulled Pork.
+    
+\item Pulled Pork (the Perl script is sometimes referred to in its concatenated
+form, PulledPork) is not actual software, but an open source Perl script also by
+Sourcefire, Inc. that incorporates rule updating and management that facilitates
+the timely, monthly updating of the Snort IDS.
+    
+\item  Barnyard2 -- When Snort executes its packet inspection, and finds suspect
+packets which  trigger a signature identifying a pattern of malicious activity,
+it presents a number of logging options.  Out of its options, the most
+lightweight and most efficient method of logging and consolidating these suspect
+packets is via unified2 (u2) binary logging.  The optimal means of reading and
+working with such logs is via an open source interpreter known as Barnyard2.
+Taking the u2 logs, barnyard2 will continuously process data that is written
+into them by the Snort IDS and output this data into readable data in a format
+that is then readable by an administrator via a database.
+   
+\item MySQL -- A heavyweight, well-established, and open-source database management
+system, we utilize MySQL to integrate all records of packets captured by the
+Snort IDS and translated by the Barnyard2 interpreter.
+
+\item Drupal/JavaScript -- We used the PHP-based Drupal CMS to build
+scarletshield.rutgers.edu, our primary front-end for the presentation of our
+data. While we originally intended to integrate the MySQL database of our
+packets into Drupal directly, we actually found that utilizing javascript for
+the presentation of this data was a far more presentable alternative.  This is
+what facilitates administrators/users being able to view our data on a web
+browser.
+
+\item fail2ban -- Working in parallel with the Snort IDS, fail2ban is an IPS based
+on Python that utilizes log inspection to facilitate the proactive blacklisting
+of IP addresses that are the source of malicious activity, specifically brute
+force attacks out-of-the-box, and interfaces with the built-in firewall on
+modern Linux kernels managed by user space application, iptables, to drop
+packets from aforementioned malicious activity sources.  By itself, it is unable
+to protect against more sophisticated exploits and attacks such as distributed
+denial-of-service.  When reinforced with an IDS such as Snort, however, and
+integrated in our Scarletshield system, they can together log and stop a large
+volume of known attacks.
+
+\item iptables -- A user space application enabling management over the Linux kernel
+firewall via a system of chains and rules.  The iptables name also refers to the
+entire kernel-level subsystems that make up the Linux kernel.
+   
+\end{enumerate}
+
+
 \chapter{Approach and Methodology}
 
 As we are designing Scarletshield from scratch with a Ubuntu 12.04 LTS server,
@@ -316,14 +407,15 @@ there are several sections to our Approach and Methodology:
 
 \begin{enumerate}
 \itemsep0em
-\item Approach
-\item Secure Server SSH
+\item Design \& Approach
+\item Employing Two-point Authentication over SSH
 \item Set up of Snort and fail2ban
 \end{enumerate}
 
 \section{Approach}
 
-\scarletshield takes all incoming packets and either accepts or drops them based
+To summarize the process in the previous chapter's system software architcture subsystem
+breakdown -- \scarletshield takes all incoming packets and either accepts or drops them based
 on iptables, which is built in to modern Linux \distros such as Ubuntu 12.04 LTS
 automatically.  What makes \scarletshield unique is how we deploy an IDS and IPS
 through Snort and Fail2ban.  Specifically, IDS mirrors all packets and analyzes
@@ -335,7 +427,21 @@ fail2ban to detect obvious brute force, overflows, and exploits in the server
 logs (/var/log/auth.log, etc.) to also automatically filter and block IP
 addresses preventively, requiring no action from the administrator.
 
-\section{Securing SSH}
+Thus, with the Snort IDS and fail2ban IPS working in concert with the
+administrator and the kernel-level firewall managed via iptables, the 
+Scarletshield approach accomplishes the following two critical objectives:
+
+\begin{enumerate}
+\item Implements a level of automation to immediately act against obvious threats requiring no action from the administrator.
+
+\item Captures more ambiguous threats with the potential of attempted penetration 
+and attacks against the Server and presents it to the administrator via a web-accessible 
+front-end that gives the administrator an analysis enabling further policy control to help thwart potential threats. 
+
+\end{enumerate}
+
+
+\section{Employing Two-point Authentication over SSH}
 
 Through our research as a group, we came to the conclusion that the safest way
 to protect our SSH  server against brute forcing would be to change our SSH’s
@@ -384,6 +490,164 @@ database and correctly install and configure its respective libraries and server
 application.  Due to how fully featured it has become over the years, we chose
 MySQL.
 
+In our Ubuntu 12.04 LTS Server Edition and extensible to any Debian based
+system, fail2ban is available via the built-in Advanced Packaging Tool (APT),
+and can be installed practically instantaneously via the following command-line
+directive:
+\begin{minted}[frame=lines,framesep=2mm]{console}
+    apt-get install fail2ban
+\end{minted}
+Due to how comprehensive the Snort IDS is and how it integrates with Pulledpork
+and Barnyard2, there are several of steps to successfully deploying Snort,
+Pulledpork, and Barnyard2 on Linux distributions, and thus the instructions
+typically vary depending on the specific operating system involved.  Our
+instructions is largely derived from the Snort Install Guide 2.9.3 for Ubuntu
+Linux, and the process we took is as follows:
+
+The Snort IDS has several of requirements, thus, we thoroughly utilized the
+Advanced Packaging Tool that comes packaged in Ubuntu 12.04 LTS to install the
+following programs via the following apt-get install directive:
+
+
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+sudo apt-get install nmap, nbtscan, apache2, php5, php5-mysql, php5-gd,
+    libpcap0.8-dev, libpcre3-dev, g++, bison, flex, libpcap-ruby, make,
+    autoconf, libtool, mysql-server, libmysqlclient-dev
+\end{minted}
+
+Next, ensuring maximum security, we applied all software and distribution
+updates as follows:
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+sudo apt-get install update 
+sudo apt-get install upgrade
+\end{minted}
+There are two more requirements for Snort that are unfortunately not available
+through the Advanced Packaging Repository.  They are the Data Acquisition API
+and libdnet.  These are available directly via the snort.org website and libdnet
+google code repository, respectively, and we acquired and installed them as
+follows: 
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+sudo wget http://www.snort.org/downloads/1806 -O daq.tar.gz 
+sudo tar xzvf daq.tar.gz 
+cd libdnet 
+sudo ./configure 
+sudo make 
+sudo make install
+\end{minted}
+The above commands round out the Data Acquisition API installation. We moved on
+to installing libdnet as follows: 
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+sudo wget http://libdnet.googlecode.com/files/libdnet-1.12.tgz -O libdnet.tar.gz 
+sudo tar xzvf libdnet.tar.gz 
+cd daq 
+sudo ./configure 
+sudo make 
+sudo make install     
+sudo ln -s /usr/local/lib/libdnet.1.0.1 /usr/lib/libdnet.1
+\end{minted}
+Now all the required software components are installed and up-to-date, we moved
+on to installing Snort 2.9.3 directly!
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+sudo wget http://www.snort.org/downloads/1814 -O snort.tar.gz 
+sudo tar xzvf snort.tar.gz 
+cd snort 
+sudo ./configure --prefix=/usr/local/snort --enable- sourcefire 
+sudo make 
+sudo make install 
+sudo mkdir /var/log/snort    
+sudo mkdir /var/snort 
+sudo groupadd snort 
+sudo useradd -g snort snort 
+sudo chown snort:snort /var/log/snort
+\end{minted}
+At this point, Snort needs a rule set. This is when Pulledpork comes to play.
+Pulledpork, being perl-based, has additional software requirements, which are
+also thankfully available via APT as follows: 
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+apt-get install libcrypt-ssleay-perl liblwp-useragent-determined-perl -y
+\end{minted}
+Pulledpork was retrieved and installed as follows into the Snort install folder:
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+cd /usr/local/snort 
+wget https://pulledpork.google.com/files/pulledpork-0.6.1.tar.gz 
+tar -xzvf pulledpork-0.6.1.tar.gz 
+cd pulledpork-0.6.1 
+mv pulledpork.pl /usr/local/bin/
+\end{minted}
+From this point forward, there are several of fine-tuned configurations that we
+made. Specifically, we created an /etc/snort directory and changed into it,
+inserting a configuration file which we also have available on our web server as
+follows: 
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+sudo mkdir /etc/snort 
+cd /etc/snort 
+wget http://scarletshield.rutgers.edu/snort.conf     
+chmod og-wr snort.conf 
+\end{minted}
+The last
+command above ensured maximum security by preventing unauthorized users from
+prying into or possibly editing your snort configuration.  Next, we created a
+rules folder and populated it as follows:     
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+sudo mkdir rules     
+wget http://scarletshield.rutgers.edu/snort.rules 
+\end{minted}
+A pulledpork configuration
+directory was downloaded and unpacked via the following configuration files:
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+sudo mkdir /etc/pulledpork     
+cd /etc/pulledpork/ 
+sudo wget http://scarletshield.rutgers.edu/pulledpork.tar.gz 
+sudo tar xzvf pulledpork.tar.gz 
+\end{minted}
+Updates via our new Pulledpork configuration are asserted as
+follows: 
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+pulledpork.pl -c /etc/pulledpork.conf	
+\end{minted}
+For our last software subsystem component, we installed barnyard2 as follows:
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+wget https://nodeload.github.com/firnsy/barnyard2/tarball/master 
+    -O barnyard2-2.10.tar.gz 
+sudo tar zxvf barnyard2-2.10.tar.gz 
+cd firnsy-barnyard2* 
+sudo autoreconf -fvi -I ./m4 
+sudo ./configure --with-mysql --with-mysql-libraries=/usr/lib/i386-linux-gnu 
+sudo make 
+sudo make install 
+sudo cp etc/barnyard2.conf /usr/local/snort/etc 
+sudo mkdir /var/log/barnyard2 
+sudo chmod 666 /var/log/barnyard2 
+sudo touch /var/log/snort/barnyard2.waldo 
+sudo chown snort.snort /var/log/snort/barnyard2.waldo
+\end{minted}
+The last components of the installation are with regards to the database, which
+we generated as follows:     
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+echo “create database snort;” | mysql -u root -p
+mysql -u root -p -D snort < ./schemas/create\_mysql     
+echo “grant create,insert, select, delete, update on snort.* to 
+    snort@localhost identified by ‘OURSECRETPASSWORD’” | mysql -u root -p
+\end{minted}
+Finally, we set up the network cards:     
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+sudo vi /etc/network/interfaces
+\end{minted}
+In the vi text editor, we added the following lines to add the mirrored,
+promiscuous interface that Snort would be utilizing:
+     
+\begin{minted}[linenos,numbersep=5pt,frame=lines,framesep=2mm]{console}
+auto eth1 iface eth1
+inet manual         
+    up ifconfig \$IFACE 0.0.0.0 up         
+    up ip link set \$IFACE promisc on         
+    down ip link set \$IFACE promisc off         
+    down ifconfig \$IFACE down
+\end{minted}
+
+This is the rigorous installation process we undertook for Scarletshield.
+Having installed the entire back-end, we can now continue on to the
+Administration Suite and Features.
 
 
 Once Snort and the database being used are installed, the user must then acquire
@@ -532,29 +796,6 @@ an administrator response suite.
 
 \chapter{Conclusion}
 
-During this semester, we achieved the following goals:
-
-%\begin{enumerate}
-%\item Deployed a Ubuntu 12.04 LTS server with Apache, MySQL, Php, Drupal, Snort,
-%		Pulled Pork, Barnyard2, fail2ban, and integrated them with iptables
-%\item Configured Snort to update via Pulled Pork and to log to MySQL via Barnyard2
-%\item Established initial rules and filters for Snort and Fail2ban
-%\item Utilized PHP scripts to build monitoring and analysis suite into Drupal
-%\item Provided dynamic and user-friendly analytics charting and mapping tools
-%\end{enumerate}
-
-Our work in integrating the Snort IDS, fail2ban IPS, and iptables within the 
-\url{http://scarletshield.rutgers.edu} web server has culminated in the final 
-development and release of a robust frontend, the Scarletshield Suite, which is
-available via \url{http://scarletshield.rutgers.edu/suite} with the password 
-“scarlet”. Our overall framework presents a great proof-of-concept for an open-source
-solution for network security that can be applicable to small-time enterprises and
-individuals who would not prefer to invest in a proprietary or commercial IDS or IPS. 
-
-To exemplify how effective our work in Scarletshield has been this semester, 
-Rutgers Engineering Computing Services (ECS) has tasked system administrator 
-Val A. Red with replicating the Scarletshield Suite for internal use to monitor 
-wireless access point gateways. 
 
 \section{Cost/Sustainability Analysis and Scalability}
 
@@ -569,6 +810,53 @@ on where you look, and on whether it is used or refurbished).
 Scarletshield in its current manifestation operates off of a Microway rackmount 
 server.  An equivalent, but modern-day, rackmount server would range between 
 \$2,000-\$5,000, which would be a large investment. 
+A modern rackmount server running an operating system and network security suite
+comparable to Scarletshield would be able to scale to meet the demands of
+thousands and possibly even millions of clients and internal gateway server
+connections.  To this end, however, the network cards would need to be far more
+powerful, possibly in the territory of 10Gbps+.  Network cards that powerful
+could be hundreds to thousands of dollars or additional cost, but would only be
+necessary for the case of an ISP or server farm scale of operations.      
+
+It is
+important to note that Scarletshield does not require dedicated hardware to the
+aforementioned extent, however.  Scarletshield could be installed into
+refurbished desktops with an extra network card and still be serviceable; this
+would actually be a very useful and cheap method of creating a homemade network
+security suite to use for a small business or home.  An equivalent desktop
+computer with the hardware specifications that our dated Microway rackmount
+server brings forth would likely only be a few hundred dollars.
+
+All the
+software utilized is free and, for the most part, open source.  Thus, this is
+what makes the Scarletshield approach so desirable.  As opposed to spending
+hundreds to thousands of dollars on a hardware-based intrusion detection and
+prevention system, a savvy network or system administrator would be able to
+implement their own and be able to extend their server for functions other than
+dedicated intrusion detection or intrusion prevention.  Scarletshield, for
+example, hosts its own web server from inside the server.       
+
+What makes
+Scarletshield so cost-effective is that the server is not necessarily restricted
+to the network security suite.  You would be able to host additional web sites
+and databases on your gateway and maximize utility.  The tradeoff would be that,
+being tied to the same server as the IDS/IPS, downtime may be somewhat higher
+due to the maintenance requirements of a network security system warranting
+updates and upgrades often to remain effective.  Nevertheless, reboots and other
+functions of maintenance actually requiring downtime is not exclusive to the
+network security system alone; thus, a network or system administrator would not
+experience grief exclusive to integrating the IDS/IPS into a production server.
+
+
+In summary, while Scarletshield in its current state can handle traffic from the
+scale of hundreds to thousands of connections, the core software architecture
+can actually be scaled down for a small business or home application by being
+installed in cheaper hardware and scaled up to handle thousands to millions of
+connections by being installed in enterprise-grade hardware.  Utility with
+Scarletshield is maximized with pitted against a hardware IDS/IPS in that
+Scarletshield can double as a production server.  Overall, that makes
+Scarletshield both cost-effective, sustainable, and scalable in the long-term!
+
 
 \section{Future Work}
 
@@ -607,20 +895,121 @@ Additionally, we will be working on a way to replicate the Scarletshield
 build; this will most likely be accomplished by presenting a ISO image that
 can be installed in managed switch servers.
 
+\section{Summary and Concluding Remarks}
 
-%\begin{figure*}[t]
-%\centering
-%\subfloat[\textrm{g = [0 0 0 0 0 0 0 0]}]{\label{part2a}
-%\includegraphics[width=0.4\textwidth]{./pics/part2a.png}}\hfill
-%\subfloat[\textrm{g = [8 6 2 0 0 1 3 6]}]{\label{part2b}
-%\includegraphics[width=0.4\textwidth]{./pics/part2b.png}}\\
-%\subfloat[\textrm{g = [-10 -10 -10 -10 10 -10 -10 -10]}]{\label{part2c}
-%\includegraphics[width=0.4\textwidth]{./pics/part2c.png}}\hfill
-%\subfloat[\textrm{g = [-3 -2 -1 2 2 -3 -5 8]}]{\label{part2d}
-%\includegraphics[width=0.4\textwidth]{./pics/part2d.png}}
-%\label{fig:part2}
-%\caption{Sample frequency band gain values.}
-%\end{figure*}
+During this semester, we achieved the following goals:
+
+\begin{enumerate}
+\item Build from scratch a specialized Ubutnu 12.04 LTS Server Edition-based
+ network security system integrating the Snort IDS and fail2ban IPS to interface
+  with its kernel firewall via iptables to automatically log and potential threats
+   and drop all packets from packet sources confirmed to be malicious.
+   
+\item Integrate the IDS and IPS into a specialized front-end intended to maximize 
+the analytical options available to system and network administrators enabling them 
+to make quick and well-informed decisions on their network security policies flexibly 
+depending on the type of traffic that Snort has been capturing. 
+\end{enumerate}
+
+%\begin{enumerate}
+%\item Deployed a Ubuntu 12.04 LTS server with Apache, MySQL, Php, Drupal, Snort,
+%		Pulled Pork, Barnyard2, fail2ban, and integrated them with iptables
+%\item Configured Snort to update via Pulled Pork and to log to MySQL via Barnyard2
+%\item Established initial rules and filters for Snort and Fail2ban
+%\item Utilized PHP scripts to build monitoring and analysis suite into Drupal
+%\item Provided dynamic and user-friendly analytics charting and mapping tools
+%\end{enumerate}
+
+Our work in integrating the Snort IDS, fail2ban IPS, and iptables within the 
+\url{http://scarletshield.rutgers.edu} web server has culminated in the final 
+development and release of a robust frontend, the Scarletshield Suite, which is
+available via \url{http://scarletshield.rutgers.edu/suite} using the password 
+“scarlet”. Our overall framework presents a great proof-of-concept for an open-source
+solution for network security that can be applicable to small-time enterprises and
+individuals who would not prefer to invest in a proprietary or commercial IDS or IPS. 
+
+After a little over a month of being online, Scarletshield has caught over 100,000 
+suspicious packets suspected of attempting penetration or exploitation of our server.
+(Exemplifying how effective our work in Scarletshield has been this semester, 
+Rutgers Engineering Computing Services (ECS) has tasked system administrator 
+Val A. Red with replicating the Scarletshield Suite for internal use to monitor 
+wireless access point gateways.)
+
+We created a lightweight system of integrated network security via a front-end suite 
+presenting the capabilities of both the Snort IDS and the fail2ban IPS in a way that
+maximizes automation and ease-of-use for the network and system administrator.  
+Nevertheless, there are some features that could be added to make Scarletshield even more robust.  
+Specifically, a distributed version of the threat analysis database and iptables could have 
+been developed such that other networks beyond our own can share information on threat sources 
+and types of attacks, being a more consolidated solution for types of threats such as DDoS. 
+The scale of that type of feature, however, could warrant its own design project entirely!  
+With regards to the work we accomplished over the semester, there is great significance in the
+proof-of-concept Scarletshield represents. As opposed to utilizing a completely security-based
+Linux distribution such as how Security Onion presents itself, Scarletshield presents a subsystem
+of capabilities that can be appended to an existing gateway or DHCP server, such as how
+Scarletshield is going to be introduced to our wireless access point gateways.  
+That alone speaks to success and confidence built in our final Capstone Design product.
+
+Scarletshield is a comprehensive proof-of-concept network security solution suite that has 
+been proven to capture and eliminate potential threats from around the globe 24/7! 
+
+\section{Contribution Breakdown}
+
+Scarletshield, an ambitious endeavor to present a large-scale network solution
+suite,  was conceived and developed by a group of five undergraduate senior
+Electrical and Computer Engineering Students of Rutgers University’s School of
+Engineering.  They are Jeff Adler, Eric Cuiffo, Parth Desai, Jeff Rabinowitz,
+and Val Red.  Due to the grand scale and major objectives of the projects, heavy
+contributions were made by each and every member. Thus, it can be estimated that
+each member had a specialized role that actually created a nice, even split of
+fifths such that without the fifth contributed by each member, the whole of
+Scarletshield would have failed. The contributions are broken down as follows,
+in the same alphabetical order:
+
+Jeff Adler -- Committed work on the extra-secure methodologies employed in
+Scarletshield, such as the two-point Google Authentication implemented for our
+Secure Shell (SSH) access, the Site Access Key authentication greeter for the
+administrative Scarletshield Suite.
+
+Eric Cuiffo -- Led the effort for an expansive, robust front-end for the
+Scarletshield based on javascript and jQuery. The suite scripts he predominantly
+led the effort on, also to be presented in the Appendix section, were
+instrumental for the front-end presentation of the Scarletshield Suite.  He also
+had the greatest contribution to the Scarletshield Heat Map, which takes all
+potential threat connection sources and actually interpolates geolocation data
+into a map of the world!
+
+Parth Desai -- His experience with PHP and MySQL enabled our early, prototype
+work on the Scarletshield Suite backend to run smoothly.  Specifically drafting
+how we would translate the database to our web frontend, Parth Desai was
+instrumental in the integration of the backend database and the frontend suite
+via queries.
+
+Jeff Rabinowitz -- Resident expert on relational databases and LaTeX, Jeff
+Rabinowitz contributed insight that ensured that not only our queries were as
+efficient as possible, but that this report was optimally presentable.  His
+ability to work with databases specifically ensured that the Scarletshield Suite
+was a success in enabling real-time analysis of the data parsed by Snort.
+
+Val A. Red -- A system administrator by trade, Val Red implemented the
+installation phase of the backend, ensuring Snort and fail2ban worked seamlessly
+and did not break the Ubuntu 12.04 LTS installation or Scarletshield’s Microway
+Server altogether.  Specifically, his rigorous configurations (.conf files will
+also be in the appendix) and fine-tuning maximized performance and allowed the
+Scarletshield Suite to work seamlessly by ensuring no errors or failures would
+occur in the extensive back-end, maximizing speed and efficiency between Snort,
+fail2ban, and the entire Scarletshield system.
+
+All group members made great, synergistic contributions such that the whole of
+Scarletshield summed together amounted to a design far greater than its parts.
+In addition, there was a lot of overlap and cross-specializations such that in
+addition to the aforementioned specialized contributions, practically every part
+of the final product was a result of all team members working together. We are
+proud of our work on Scarletshield, and have learned a great deal about network
+security and systems programming overall in building it!
+
+
+
 }
 \printbibliography
 
