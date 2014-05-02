@@ -874,26 +874,42 @@ frontend for monitoring and reacting to threats, we will maximize the potential
 of Scarletshield to be deployable to both private switches and enterprise-level
 networks.
 
-Primarily, this entails better integrating current monitoring scripts with
-Drupal.
+We created a lightweight system of integrated network security via a front-end suite 
+presenting the capabilities of both the Snort IDS and the fail2ban IPS in a way that
+maximizes automation and ease-of-use for the network and system administrator.  
+Nevertheless, there are some features that could be added to make Scarletshield even more robust.  
+Specifically, a distributed version of the threat analysis database and iptables could have 
+been developed such that other networks beyond our own can share information on threat sources 
+and types of attacks, being a more consolidated solution for types of threats such as DDoS. 
+The scale of that type of feature, however, could warrant its own design project entirely!  
+With regards to the work we accomplished over the semester, there is great significance in the
+proof-of-concept Scarletshield represents. As opposed to utilizing a completely security-based
+Linux distribution such as how Security Onion presents itself, Scarletshield presents a subsystem
+of capabilities that can be appended to an existing gateway or DHCP server, such as how
+Scarletshield is going to be introduced to our wireless access point gateways.  
+That alone speaks to success and confidence built in our final Capstone Design product.
 
-Moving forward we envision multiple ScarletShield deployments being used to
-protect a multitude of systems simultaneously.  With this in mind we plan on
-creating a global set of black lists and logs that all deployments can
-access and update.  Maintaining global lists would allow each individual
-deployment of ScarletShield to share collective knowledge. If one instance
-of ScarletShield is attacked, another deployment can preemptively block the
-attacker instead of waiting to be attacked itself.
-
-Also, our scripts will allow administrators the option to take action on
-addresses logged with signatures, along with varying degrees of reaction
-steps they may be able to take (functionality to throttle or ban IPs
-altogether, for example), such that Scarletshield will give full control to
-the network administrator.
-
-Additionally, we will be working on a way to replicate the Scarletshield
-build; this will most likely be accomplished by presenting a ISO image that
-can be installed in managed switch servers.
+%
+%Primarily, this entails better integrating current monitoring scripts with
+%Drupal.
+%
+%Moving forward we envision multiple ScarletShield deployments being used to
+%protect a multitude of systems simultaneously.  With this in mind we plan on
+%creating a global set of black lists and logs that all deployments can
+%access and update.  Maintaining global lists would allow each individual
+%deployment of ScarletShield to share collective knowledge. If one instance
+%of ScarletShield is attacked, another deployment can preemptively block the
+%attacker instead of waiting to be attacked itself.
+%
+%Also, our scripts will allow administrators the option to take action on
+%addresses logged with signatures, along with varying degrees of reaction
+%steps they may be able to take (functionality to throttle or ban IPs
+%altogether, for example), such that Scarletshield will give full control to
+%the network administrator.
+%
+%Additionally, we will be working on a way to replicate the Scarletshield
+%build; this will most likely be accomplished by presenting a ISO image that
+%can be installed in managed switch servers.
 
 \section{Summary and Concluding Remarks}
 
@@ -934,22 +950,6 @@ suspicious packets suspected of attempting penetration or exploitation of our se
 Rutgers Engineering Computing Services (ECS) has tasked system administrator 
 Val A. Red with replicating the Scarletshield Suite for internal use to monitor 
 wireless access point gateways.)
-
-We created a lightweight system of integrated network security via a front-end suite 
-presenting the capabilities of both the Snort IDS and the fail2ban IPS in a way that
-maximizes automation and ease-of-use for the network and system administrator.  
-Nevertheless, there are some features that could be added to make Scarletshield even more robust.  
-Specifically, a distributed version of the threat analysis database and iptables could have 
-been developed such that other networks beyond our own can share information on threat sources 
-and types of attacks, being a more consolidated solution for types of threats such as DDoS. 
-The scale of that type of feature, however, could warrant its own design project entirely!  
-With regards to the work we accomplished over the semester, there is great significance in the
-proof-of-concept Scarletshield represents. As opposed to utilizing a completely security-based
-Linux distribution such as how Security Onion presents itself, Scarletshield presents a subsystem
-of capabilities that can be appended to an existing gateway or DHCP server, such as how
-Scarletshield is going to be introduced to our wireless access point gateways.  
-That alone speaks to success and confidence built in our final Capstone Design product.
-
 Scarletshield is a comprehensive proof-of-concept network security solution suite that has 
 been proven to capture and eliminate potential threats from around the globe 24/7! 
 
@@ -1012,5 +1012,32 @@ security and systems programming overall in building it!
 
 }
 \printbibliography
+
+\appendix 
+{
+\setlength{\parskip}{1em}
+
+\chapter{Source Code Highlights}
+
+\section{IPLocater.js}
+
+\inputminted[linenos,numbersep=5pt,frame=lines,framesep=2mm]{javascript}{IPLocator.js}
+
+\section{HistoryGenerator.js}
+
+\inputminted[linenos,numbersep=5pt,frame=lines,framesep=2mm]{javascript}{HistoryGenerator.js}
+
+\section{Analytics.js}
+
+\inputminted[linenos,numbersep=5pt,frame=lines,framesep=2mm]{javascript}{Analytics.js}
+
+\section{main.js}
+
+\inputminted[linenos,numbersep=5pt,frame=lines,framesep=2mm]{javascript}{main.js}
+
+%\inputminted{conf}[[linenos,numbersep=5pt,frame=lines,framesep=2mm]]{./snort.conf}
+
+
+}
 
 \end{document}
